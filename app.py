@@ -16,7 +16,6 @@ import asyncio
 import traceback
 from botocore.config import Config
 
-
 from bs4 import BeautifulSoup
 
 from shiny import App, reactive, render, ui
@@ -32,13 +31,13 @@ except Exception:
 
 
 APP_TITLE = "RNA-Seq S3 Browser (Shiny for Python)"
-DEFAULT_REGION = os.environ.get("AWS_REGION", "us-east-1")
+DEFAULT_REGION = os.environ.get("AWS_REGION", "us-east-2")
 DEFAULT_BUCKET = os.environ.get("RNASEQ_S3_BUCKET", "rnaseqdatabase")
 BASE_PREFIX = os.environ.get("RNASEQ_BASE_PREFIX", "vendor-data/")
 MAX_LIST_OBJECTS = int(os.environ.get("RNASEQ_MAX_LIST_OBJECTS", "5000"))
 
 SUBFOLDER_CHOICES = {
-    "(project root)": "(project root)",  # label and value same for now
+    "(project root)": "(project root)",
     "Fastq/": "Fastq/",
     "FastQC/": "FastQC/",
     "QC/": "QC/",
@@ -46,14 +45,11 @@ SUBFOLDER_CHOICES = {
     "DESeq2/": "DESeq2/",
 }
 
-
 # Where Shiny serves static files from
-# Static files are served from ./www in Shiny for Python
 APP_DIR = pathlib.Path(__file__).resolve().parent
 WWW_DIR = APP_DIR / "www"
 WWW_DOWNLOADS_DIR = WWW_DIR / "downloads"
 WWW_DOWNLOADS_DIR.mkdir(parents=True, exist_ok=True)
-
 
 FASTQC_PREVIEW_BASE_URL = "/downloads"
 
@@ -67,6 +63,7 @@ DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
 def _make_s3(region: str):
     cfg = Config(
         region_name=region,
+        signature_version="s3v4",   # 🔥 REQUIRED
         connect_timeout=5,
         read_timeout=30,
         retries={"max_attempts": 3, "mode": "standard"},
@@ -74,10 +71,14 @@ def _make_s3(region: str):
     return boto3.session.Session().client("s3", config=cfg)
 
 
+
+
 def _fastqc_local_name_for_key(key: str) -> str:
     # stable unique name per S3 key
     h = hashlib.sha1(key.encode("utf-8")).hexdigest()[:12]
     return f"fastqc_{h}.html"
+
+
 def _filter_df_for_view(dff: pd.DataFrame, subfolder: str) -> pd.DataFrame:
     if dff.empty:
         return dff
@@ -119,6 +120,8 @@ def _presign(s3, bucket: str, key: str, exp: int = 3600) -> str:
         Params={"Bucket": bucket, "Key": key},
         ExpiresIn=exp,
     )
+
+
 def _safe_dir_name_from_key(key: str) -> str:
     # stable folder name per S3 key (prevents collisions)
     h = hashlib.sha1(key.encode("utf-8")).hexdigest()[:12]
@@ -133,22 +136,17 @@ def _extract_fastqc_zip_from_s3_to_www(s3, bucket: str, zip_key: str) -> str:
     Returns the local URL to the extracted HTML report, e.g.:
       /downloads/fastqc_zip_<hash>/.../fastqc_report.html
     """
-    # 1) Download zip bytes
     obj = s3.get_object(Bucket=bucket, Key=zip_key)
     zip_bytes = obj["Body"].read()
 
-    # 2) Extract into a unique folder under www/downloads
     folder_name = _safe_dir_name_from_key(zip_key)
     out_dir = (WWW_DOWNLOADS_DIR / folder_name)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # 3) Extract (with zip-slip protection)
     with zipfile.ZipFile(io.BytesIO(zip_bytes)) as z:
         for member in z.infolist():
-            # normalize and prevent zip-slip
             member_path = member.filename.replace("\\", "/")
             if member_path.startswith("/") or ".." in member_path.split("/"):
-                # skip suspicious entries
                 continue
 
             dest_path = (out_dir / member_path).resolve()
@@ -162,21 +160,14 @@ def _extract_fastqc_zip_from_s3_to_www(s3, bucket: str, zip_key: str) -> str:
                 with z.open(member) as src, open(dest_path, "wb") as dst:
                     dst.write(src.read())
 
-    # 4) Find the FastQC html report inside extracted contents
-    # FastQC typically uses: <sample>_fastqc/fastqc_report.html
     html_candidates = list(out_dir.rglob("fastqc_report.html"))
-
-    # Some pipelines may store an alternate name; if needed, broaden search
     if not html_candidates:
         html_candidates = list(out_dir.rglob("*.html"))
 
     if not html_candidates:
         raise RuntimeError("Zip extracted but no HTML report was found inside.")
 
-    # Prefer the canonical fastqc_report.html if present
     html_path = html_candidates[0].resolve()
-
-    # 5) Build a local URL relative to WWW_DIR (served by Shiny static assets)
     rel = html_path.relative_to(WWW_DIR).as_posix()
     return "/" + rel
 
@@ -193,14 +184,11 @@ def _rewrite_fastqc_html(s3, bucket: str, html_key: str, html: str) -> str:
     def _maybe_presign(val: str) -> str:
         if not val:
             return val
-        # normalize
         val = val.strip()
-        # cover typical fastqc references
         if val.startswith(("Images/", "Icons/")):
             return _presign(s3, bucket, base + val)
         return val
 
-    # Rewrite common tag attrs
     for tag in soup.find_all(["img", "a", "link", "script"]):
         if tag.name == "img":
             tag["src"] = _maybe_presign(tag.get("src", "") or "")
@@ -213,14 +201,13 @@ def _rewrite_fastqc_html(s3, bucket: str, html_key: str, html: str) -> str:
             if src:
                 tag["src"] = _maybe_presign(src)
 
-    # Rewrite CSS url(Images/...) inside <style> blocks
     for style in soup.find_all("style"):
         css = style.string or ""
         if not css:
             continue
 
         def _css_repl(m):
-            path = m.group(2) + m.group(3)  # Images/ + filename OR Icons/ + filename
+            path = m.group(2) + m.group(3)
             url = _presign(s3, bucket, base + path)
             return f'url("{url}")'
 
@@ -232,7 +219,6 @@ def _rewrite_fastqc_html(s3, bucket: str, html_key: str, html: str) -> str:
         style.string = css
 
     return str(soup)
-
 
 
 def _list_projects(s3, bucket: str) -> List[str]:
@@ -261,7 +247,6 @@ def _list_objects(s3, bucket: str, prefix: str, limit: int = MAX_LIST_OBJECTS) -
                 }
             )
             if limit and len(rows) >= limit:
-                # Stop early to prevent "infinite" listing on huge prefixes
                 token = None
                 r["IsTruncated"] = False
                 break
@@ -276,13 +261,11 @@ def _list_objects(s3, bucket: str, prefix: str, limit: int = MAX_LIST_OBJECTS) -
     return df
 
 
-
 # ----------------- UI -----------------
 
 app_ui = ui.page_fluid(
     ui.h2(APP_TITLE),
 
-    # JS handler to open FastQC HTML in a new tab
     ui.tags.script(
         """
         (function () {
@@ -301,17 +284,18 @@ app_ui = ui.page_fluid(
                 alert("Popup blocked. Please allow popups for this site.");
               }
             } catch (e) {
-              alert("Failed to open FastQC report: " + e);
+              alert("Failed to open file: " + e);
             }
           });
         })();
         """
     ),
 
-        ui.layout_sidebar(
+    ui.layout_sidebar(
         ui.sidebar(
             ui.input_text("region", "AWS Region", value=DEFAULT_REGION),
             ui.input_text("bucket", "Bucket", value=DEFAULT_BUCKET),
+
             ui.input_radio_buttons(
                 "view_mode",
                 "View",
@@ -325,9 +309,12 @@ app_ui = ui.page_fluid(
             ui.input_action_button("refresh", "Refresh projects", class_="btn-primary"),
             ui.output_ui("project_ui"),
             ui.output_ui("sample_selected"),
+
             ui.input_action_button("open_log", "Open Salmon log", class_="btn-outline-secondary"),
             ui.input_action_button("open_meta", "Open meta_info.json", class_="btn-outline-secondary"),
             ui.input_action_button("download_quant", "Download quant.sf", class_="btn-outline-secondary"),
+
+            ui.input_action_button("open_file", "Open selected file", class_="btn-info"),
 
             ui.input_select("subfolder", "Subfolder", SUBFOLDER_CHOICES),
 
@@ -335,7 +322,6 @@ app_ui = ui.page_fluid(
 
             ui.hr(),
 
-            # ✅ Usability features
             ui.input_text("filter", "Filter (contains in key)", value=""),
             ui.input_checkbox("auto_list", "Auto-list when Project/Subfolder changes", value=False),
 
@@ -350,13 +336,13 @@ app_ui = ui.page_fluid(
             ui.hr(),
             ui.output_ui("selected"),
 
-            # ✅ Fallback selection that always works (even if grid click selection doesn't)
             ui.input_numeric("row_idx", "Select row #", value=0, min=0, step=1),
             ui.input_action_button("pick_btn", "Select row", class_="btn-outline-primary"),
 
             ui.input_action_button("preview", "Preview (text)", class_="btn-secondary"),
             ui.input_action_button("view_fastqc", "View FastQC (new tab)", class_="btn-info"),
             ui.input_action_button("download", "Download", class_="btn-secondary"),
+
             width=380,
         ),
         ui.div(
@@ -392,13 +378,102 @@ def server(input, output, session):
         except Exception:
             return ""
 
+    def _subfolder_value() -> str:
+        sf = (input.subfolder() or "").strip()
+        return "" if sf == "(project root)" else sf
+
+    def _find_key_for_sample(sample: str, kind: str) -> Optional[str]:
+        """
+        kind: 'log' | 'meta' | 'quant'
+        """
+        if not sample:
+            return None
+
+        full_df = df.get()
+        if full_df.empty:
+            return None
+
+        keys = full_df["key"].astype(str)
+        sample_pat = f"/Salmon_Quant/{re.escape(sample)}/"
+
+        if kind == "log":
+            m = keys.str.contains(sample_pat) & keys.str.lower().str.endswith("/logs/salmon_quant.log")
+        elif kind == "meta":
+            m = keys.str.contains(sample_pat) & keys.str.lower().str.endswith("/aux_info/meta_info.json")
+        elif kind == "quant":
+            m = keys.str.contains(sample_pat) & keys.str.lower().str.endswith("/quant.sf")
+        else:
+            return None
+
+        hit = full_df[m]
+        if hit.empty:
+            return None
+        return str(hit.iloc[0]["key"])
+
     @reactive.Effect
     def _init_s3():
         _ = input.region()
         s3.set(_make_s3(input.region()))
 
+    # Open ANY selected file (works best in Raw files mode)
+    @reactive.Effect
+    @reactive.event(input.open_file)
+    async def _open_raw_file():
+        key = selected_key.get()
+        if not key:
+            status_state.set("No file selected. Use 'Select row' first.")
+            return
+
+        url = _presign(s3.get(), input.bucket(), key)
+        await session.send_custom_message("open_fastqc", {"url": url})
+
+
+    # Sample-scoped buttons (Samples mode)
+    @reactive.Effect
+    @reactive.event(input.open_log)
+    async def _open_salmon_log():
+        if input.view_mode() != "samples":
+            status_state.set("Switch to Samples mode first.")
+            return
+
+        sample = selected_sample.get()
+        key = _find_key_for_sample(sample, "log")
+        if not key:
+            status_state.set(f"No salmon_quant.log found for sample '{sample}'.")
+            return
+
+        url = _presign(s3.get(), input.bucket(), key)
+        await session.send_custom_message("open_fastqc", {"url": url})
+
+
+    @reactive.Effect
+    @reactive.event(input.open_meta)
+    async def _open_meta_info():
+        sample = selected_sample.get()
+        key = _find_key_for_sample(sample, "meta")
+        if not key:
+            status_state.set(f"No meta_info.json found for sample '{sample}'.")
+            return
+
+        url = _presign(s3.get(), input.bucket(), key)
+        await session.send_custom_message("open_fastqc", {"url": url})
+
+
+    @reactive.Effect
+    @reactive.event(input.download_quant)
+    async def _download_quant_sf():
+        sample = selected_sample.get()
+        key = _find_key_for_sample(sample, "quant")
+        if not key:
+            status_state.set(f"No quant.sf found for sample '{sample}'.")
+            return
+
+        url = _presign(s3.get(), input.bucket(), key)
+        await session.send_custom_message("open_fastqc", {"url": url})
+
+
     # ---------------------------
-    # Thread workers (NO reactive.set inside these)
+    # Thread workers
     # ---------------------------
     def _load_projects_work() -> List[str]:
         return _list_projects(s3.get(), input.bucket())
@@ -406,20 +481,18 @@ def server(input, output, session):
     def _load_objects_work(proj: str, subfolder: str) -> pd.DataFrame:
         sf = "" if subfolder == "(project root)" else (subfolder or "")
         prefix = _normalize_prefix(f"{BASE_PREFIX}{proj}/{sf}")
-
-
         print("[LIST]", input.bucket(), prefix)
 
         new_df = _list_objects(
             s3.get(),
             input.bucket(),
             prefix,
-            limit=MAX_LIST_OBJECTS,   # keep the limit
+            limit=MAX_LIST_OBJECTS,
         )
         return _filter_df_for_view(new_df, subfolder)
 
     # ---------------------------
-    # Async loaders (reactive.set ONLY here)
+    # Async loaders
     # ---------------------------
     async def _load_projects_async():
         try:
@@ -443,14 +516,12 @@ def server(input, output, session):
             projects.set([])
             status_state.set(f"Failed to load projects: {e}")
 
-
     async def _load_objects_async():
         if s3.get() is None:
             status_state.set("S3 client not ready yet. Try again in a second.")
             return
 
         proj = _get_project_value()
-
         if not proj:
             status_state.set("Select a project first.")
             df.set(pd.DataFrame())
@@ -462,8 +533,10 @@ def server(input, output, session):
 
         is_loading_objects.set(True)
         try:
-            prefix = _normalize_prefix(f"{BASE_PREFIX}{proj}/{input.subfolder()}")
+            sf = _subfolder_value()
+            prefix = _normalize_prefix(f"{BASE_PREFIX}{proj}/{sf}")
             status_state.set(f"Listing up to {MAX_LIST_OBJECTS} objects in: {prefix}")
+
             new_df = await asyncio.to_thread(_load_objects_work, proj, input.subfolder())
             df.set(new_df)
 
@@ -488,7 +561,6 @@ def server(input, output, session):
             df.set(pd.DataFrame())
             selected_key.set(None)
             status_state.set(f"Failed to list objects: {e}")
-
         finally:
             is_loading_objects.set(False)
 
@@ -508,7 +580,6 @@ def server(input, output, session):
             return pd.DataFrame()
 
         keys = dff["key"].astype(str)
-
         sample_from_dir = keys.str.extract(r"/Salmon_Quant/([^/]+)/", expand=False)
         sample_from_done = keys.str.extract(r"/Salmon_Quant/([^/]+)\.done$", expand=False)
         dff["sample"] = sample_from_dir.fillna(sample_from_done).fillna("")
@@ -521,7 +592,6 @@ def server(input, output, session):
         dff["is_done"] = low.str.endswith(".done")
 
         g = dff.groupby("sample")
-
         out = pd.DataFrame(
             {
                 "sample": g.size().index,
@@ -539,7 +609,7 @@ def server(input, output, session):
         return out.sort_values(["status", "sample"], ascending=[False, True]).reset_index(drop=True)
 
     # ---------------------------
-    # Startup + buttons (NO duplicates)
+    # Startup + buttons
     # ---------------------------
     @reactive.Effect
     async def _autoload_projects_on_start():
@@ -559,33 +629,24 @@ def server(input, output, session):
 
     @reactive.Effect
     async def _auto_list_on_change():
-    # only run if user wants it
         if not input.auto_list():
             return
 
-    # must have a real project selected
         proj = _get_project_value()
         if not proj:
             return
 
-    # must have projects loaded
         if not projects.get():
             return
 
-    # IMPORTANT: only trigger when inputs actually change
-    # Use these reads to establish dependencies
-        subfolder = input.subfolder()
+        _ = input.subfolder()
 
-    # remember selected project preference (doesn't trigger listing again)
         selected_project_pref.set(proj)
 
-    # avoid overlapping list calls
         if is_loading_objects.get():
             return
 
         await _load_objects_async()
-
-
 
     @reactive.Effect
     async def _auto_refresh_timer():
@@ -667,24 +728,13 @@ def server(input, output, session):
         sample = str(sdf.iloc[i]["sample"])
         selected_sample.set(sample)
 
-        full_df = df.get()
-        keys = full_df["key"].astype(str)
-
-        candidate = full_df[
-            keys.str.contains(f"/Salmon_Quant/{re.escape(sample)}/")
-            & keys.str.lower().str.endswith("/quant.sf")
-        ]
-        if not candidate.empty:
-            selected_key.set(candidate.iloc[0]["key"])
+        # auto-select quant.sf if present
+        key = _find_key_for_sample(sample, "quant")
+        if key:
+            selected_key.set(key)
             status_state.set(f"Selected sample '{sample}' and auto-selected quant.sf.")
-            return
-
-        any_file = full_df[keys.str.contains(f"/Salmon_Quant/{re.escape(sample)}/")]
-        if not any_file.empty:
-            selected_key.set(any_file.iloc[0]["key"])
-            status_state.set(f"Selected sample '{sample}'.")
         else:
-            status_state.set(f"Selected sample '{sample}', but no files were found.")
+            status_state.set(f"Selected sample '{sample}', but quant.sf was not found.")
 
     @reactive.Effect
     @reactive.event(input.pick_btn)
@@ -717,8 +767,17 @@ def server(input, output, session):
     def status():
         return ui.div(status_state.get())
 
+    @output
+    @render.ui
+    def preview_html():
+        # Keep it simple for now; you can later show HTML previews here
+        return ui.em("Preview not generated yet. Select a file and click an action button.")
 
-
+    @output
+    @render.text
+    def preview_text():
+        # Text preview placeholder
+        return ""
 
 
 APP_DIR = pathlib.Path(__file__).resolve().parent
@@ -730,8 +789,6 @@ app = App(
     server,
     static_assets={
         "/": WWW_DIR,
-        "/downloads": WWW_DOWNLOADS_DIR,  # serve www/downloads at /downloads
+        "/downloads": WWW_DOWNLOADS_DIR,
     },
 )
-
-

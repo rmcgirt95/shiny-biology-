@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>quant.sf Scatter Plot (Drag & Drop)</title>
+
+  <!-- Plotly (CDN) -->
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 20px; color:#111; }
+    h1 { margin: 0 0 8px 0; font-size: 22px; }
+    .muted { color:#555; margin: 0 0 16px 0; }
+    .row { display:flex; gap: 16px; flex-wrap: wrap; }
+    .card { border:1px solid #ddd; border-radius: 10px; padding: 14px; background:#fff; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+    .dropzone {
+      border: 2px dashed #999; border-radius: 12px; padding: 22px; text-align:center;
+      background: #fafafa; min-width: 320px; flex: 1;
+    }
+    .dropzone.dragover { border-color:#111; background:#f3f3f3; }
+    .controls { min-width: 320px; flex: 1; }
+    label { display:block; font-size: 12px; color:#333; margin: 10px 0 6px; }
+    select, input[type="checkbox"], input[type="number"] { font-size: 14px; }
+    select, input[type="number"] { width: 100%; padding: 8px; border-radius: 8px; border:1px solid #ccc; }
+    .checks { display:flex; gap: 14px; align-items:center; margin-top: 10px; }
+    .checks label { margin: 0; display:flex; gap: 8px; align-items:center; font-size: 14px; }
+    button {
+      margin-top: 12px; padding: 10px 12px; border-radius: 10px; border:1px solid #222;
+      background:#111; color:#fff; cursor:pointer;
+    }
+    button:disabled { opacity: .5; cursor:not-allowed; }
+    #plot { width: 100%; height: 560px; }
+    table { width:100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+    th, td { border-bottom: 1px solid #eee; padding: 6px; text-align:left; }
+    th { background:#fafafa; position: sticky; top: 0; }
+    .table-wrap { max-height: 260px; overflow: auto; border:1px solid #eee; border-radius: 10px; }
+    .pill { display:inline-block; padding: 2px 8px; border:1px solid #ddd; border-radius: 999px; font-size: 12px; color:#333; }
+    .fileline { display:flex; gap: 8px; align-items:center; flex-wrap: wrap; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>quant.sf Scatter Plot</h1>
+  <p class="muted">Drag & drop one or more <span class="pill">quant.sf</span> files. This runs locally in your browser.</p>
+
+  <div class="row">
+    <div class="card dropzone" id="dropzone">
+      <div style="font-size:16px; font-weight:600;">Drop files here</div>
+      <div style="margin-top:6px; color:#555;">or click to choose</div>
+      <input id="fileInput" type="file" multiple accept=".sf,.txt,.tsv,.csv" style="display:none" />
+      <div class="fileline" id="fileList"></div>
+    </div>
+
+    <div class="card controls">
+      <label for="activeFile">Active file</label>
+      <select id="activeFile" disabled></select>
+
+      <label for="xCol">X-axis</label>
+      <select id="xCol" disabled></select>
+
+      <label for="yCol">Y-axis</label>
+      <select id="yCol" disabled></select>
+
+      <div class="checks">
+        <label><input type="checkbox" id="logX" /> log10 X</label>
+        <label><input type="checkbox" id="logY" checked /> log10 Y</label>
+      </div>
+
+      <label for="maxPoints">Max points (for speed)</label>
+      <input type="number" id="maxPoints" value="50000" min="1000" step="1000" disabled />
+
+      <button id="renderBtn" disabled>Render scatter</button>
+
+      <div style="margin-top:10px; color:#555; font-size:13px;">
+        Tip: A common plot is <span class="pill">EffectiveLength</span> vs <span class="pill">TPM</span> (log Y).
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div id="plot"></div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+      <div style="font-weight:600;">Preview (first 50 rows)</div>
+      <div id="stats" style="color:#555; font-size:13px;"></div>
+    </div>
+    <div class="table-wrap">
+      <table id="previewTable"></table>
+    </div>
+  </div>
+
+<script>
+  // --------- State ---------
+  const state = {
+    files: [], // { name, rows, columns }
+    activeIndex: -1,
+  };
+
+  // --------- DOM ---------
+  const dropzone = document.getElementById("dropzone");
+  const fileInput = document.getElementById("fileInput");
+  const fileList = document.getElementById("fileList");
+
+  const activeFileSel = document.getElementById("activeFile");
+  const xColSel = document.getElementById("xCol");
+  const yColSel = document.getElementById("yCol");
+  const logX = document.getElementById("logX");
+  const logY = document.getElementById("logY");
+  const maxPoints = document.getElementById("maxPoints");
+  const renderBtn = document.getElementById("renderBtn");
+
+  const previewTable = document.getElementById("previewTable");
+  const stats = document.getElementById("stats");
+
+  // --------- Helpers ---------
+  function readFileAsText(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(reader.error);
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.readAsText(file);
+    });
+  }
+
+  // Basic TSV parser (handles tabs; ignores empty trailing lines)
+  function parseTSV(text) {
+    const lines = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n").filter(l => l.trim().length > 0);
+    if (lines.length < 2) throw new Error("File has too few lines to parse.");
+    const header = lines[0].split("\t").map(h => h.trim());
+    const rows = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const parts = lines[i].split("\t");
+      const row = {};
+      for (let c = 0; c < header.length; c++) {
+        const key = header[c];
+        const raw = parts[c] ?? "";
+        // Convert to number when possible
+        const num = Number(raw);
+        row[key] = (raw !== "" && Number.isFinite(num)) ? num : raw;
+      }
+      rows.push(row);
+    }
+    return { columns: header, rows };
+  }
+
+  function uniqueNumericColumns(columns, rows) {
+    // numeric if at least one value is a finite number and not all are empty strings
+    const numeric = [];
+    for (const col of columns) {
+      let seenNum = false;
+      for (let i = 0; i < Math.min(rows.length, 2000); i++) {
+        const v = rows[i][col];
+        if (typeof v === "number" && Number.isFinite(v)) { seenNum = true; break; }
+      }
+      if (seenNum) numeric.push(col);
+    }
+    return numeric;
+  }
+
+  function setSelectOptions(selectEl, options, selectedValue) {
+    selectEl.innerHTML = "";
+    for (const opt of options) {
+      const o = document.createElement("option");
+      o.value = opt;
+      o.textContent = opt;
+      selectEl.appendChild(o);
+    }
+    if (selectedValue && options.includes(selectedValue)) {
+      selectEl.value = selectedValue;
+    } else if (options.length > 0) {
+      selectEl.value = options[0];
+    }
+  }
+
+  function renderPreview(columns, rows) {
+    const previewRows = rows.slice(0, 50);
+    previewTable.innerHTML = "";
+
+    const thead = document.createElement("thead");
+    const trh = document.createElement("tr");
+    for (const c of columns) {
+      const th = document.createElement("th");
+      th.textContent = c;
+      trh.appendChild(th);
+    }
+    thead.appendChild(trh);
+    previewTable.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+    for (const r of previewRows) {
+      const tr = document.createElement("tr");
+      for (const c of columns) {
+        const td = document.createElement("td");
+        const v = r[c];
+        td.textContent = (typeof v === "number") ? String(v) : (v ?? "");
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    }
+    previewTable.appendChild(tbody);
+  }
+
+  function downsample(rows, maxN) {
+    if (rows.length <= maxN) return rows;
+    // uniform random sample
+    const out = [];
+    const used = new Set();
+    while (out.length < maxN) {
+      const idx = Math.floor(Math.random() * rows.length);
+      if (!used.has(idx)) {
+        used.add(idx);
+        out.push(rows[idx]);
+      }
+    }
+    return out;
+  }
+
+  function transformLog(values) {
+    // Plotly log axes require positive values; we’ll drop non-positive points
+    const out = [];
+    for (const v of values) {
+      if (typeof v === "number" && Number.isFinite(v) && v > 0) out.push(v);
+      else out.push(null);
+    }
+    return out;
+  }
+
+  function renderScatter() {
+    const fileObj = state.files[state.activeIndex];
+    if (!fileObj) return;
+
+    const xCol = xColSel.value;
+    const yCol = yColSel.value;
+    const doLogX = logX.checked;
+    const doLogY = logY.checked;
+    const maxN = Number(maxPoints.value) || 50000;
+
+    let rows = downsample(fileObj.rows, maxN);
+
+    let x = rows.map(r => r[xCol]);
+    let y = rows.map(r => r[yCol]);
+
+    // If user chooses log axis, Plotly wants axis type = 'log' AND values > 0
+    // We'll filter points where needed.
+    if (doLogX) x = transformLog(x);
+    if (doLogY) y = transformLog(y);
+
+    // Build hover text if Name exists
+    const nameCol = fileObj.columns.includes("Name") ? "Name" : null;
+    const hover = nameCol ? rows.map(r => String(r[nameCol] ?? "")) : rows.map(() => "");
+
+    // Filter out nulls created by log transform
+    const fx = [];
+    const fy = [];
+    const fhover = [];
+    for (let i = 0; i < x.length; i++) {
+      if (x[i] === null || y[i] === null) continue;
+      if (typeof x[i] !== "number" || typeof y[i] !== "number") continue;
+      fx.push(x[i]); fy.push(y[i]); fhover.push(hover[i]);
+    }
+
+    const trace = {
+      type: "scattergl",
+      mode: "markers",
+      x: fx,
+      y: fy,
+      text: fhover,
+      hovertemplate: (nameCol ? "<b>%{text}</b><br>" : "") + `${xCol}: %{x}<br>${yCol}: %{y}<extra></extra>`,
+      marker: { size: 5, opacity: 0.45 }
+    };
+
+    const layout = {
+      title: `${fileObj.name}: ${yCol} vs ${xCol}`,
+      xaxis: { title: xCol, type: doLogX ? "log" : "linear" },
+      yaxis: { title: yCol, type: doLogY ? "log" : "linear" },
+      margin: { l: 60, r: 20, t: 50, b: 60 },
+      height: 560
+    };
+
+    Plotly.newPlot("plot", [trace], layout, { responsive: true });
+
+    const total = fileObj.rows.length;
+    const plotted = fx.length;
+    stats.textContent = `Rows: ${total.toLocaleString()} • Plotted: ${plotted.toLocaleString()} • Downsample cap: ${maxN.toLocaleString()}`;
+  }
+
+  function refreshUIForActiveFile() {
+    const fileObj = state.files[state.activeIndex];
+    if (!fileObj) return;
+
+    // Populate file selector
+    setSelectOptions(activeFileSel, state.files.map((f, i) => `${i+1}: ${f.name}`), `${state.activeIndex+1}: ${fileObj.name}`);
+    activeFileSel.value = `${state.activeIndex+1}: ${fileObj.name}`;
+
+    // Numeric columns for plotting
+    const numericCols = uniqueNumericColumns(fileObj.columns, fileObj.rows);
+
+    // Sensible defaults for Salmon quant.sf
+    const xDefault = numericCols.includes("EffectiveLength") ? "EffectiveLength" : (numericCols[0] || "");
+    const yDefault = numericCols.includes("TPM") ? "TPM" : (numericCols.includes("NumReads") ? "NumReads" : (numericCols[0] || ""));
+
+    setSelectOptions(xColSel, numericCols, xDefault);
+    setSelectOptions(yColSel, numericCols, yDefault);
+
+    // Preview table
+    renderPreview(fileObj.columns, fileObj.rows);
+
+    // Enable controls
+    activeFileSel.disabled = false;
+    xColSel.disabled = numericCols.length === 0;
+    yColSel.disabled = numericCols.length === 0;
+    maxPoints.disabled = false;
+    renderBtn.disabled = numericCols.length === 0;
+
+    // Auto-render
+    renderScatter();
+  }
+
+  function renderFilePills() {
+    fileList.innerHTML = "";
+    state.files.forEach((f, idx) => {
+      const pill = document.createElement("span");
+      pill.className = "pill";
+      pill.style.cursor = "pointer";
+      pill.textContent = f.name;
+      pill.title = "Click to make active";
+      pill.onclick = () => {
+        state.activeIndex = idx;
+        refreshUIForActiveFile();
+      };
+      fileList.appendChild(pill);
+    });
+  }
+
+  async function handleFiles(fileListObj) {
+    const files = Array.from(fileListObj);
+    for (const file of files) {
+      try {
+        const text = await readFileAsText(file);
+        const parsed = parseTSV(text);
+        state.files.push({ name: file.name, columns: parsed.columns, rows: parsed.rows });
+      } catch (e) {
+        alert(`Failed to parse "${file.name}": ${e.message || e}`);
+      }
+    }
+
+    if (state.files.length > 0 && state.activeIndex === -1) {
+      state.activeIndex = 0;
+    }
+    renderFilePills();
+    refreshUIForActiveFile();
+  }
+
+  // --------- Events: Dropzone + file picker ---------
+  dropzone.addEventListener("click", () => fileInput.click());
+
+  dropzone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropzone.classList.add("dragover");
+  });
+
+  dropzone.addEventListener("dragleave", () => {
+    dropzone.classList.remove("dragover");
+  });
+
+  dropzone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropzone.classList.remove("dragover");
+    if (e.dataTransfer?.files?.length) handleFiles(e.dataTransfer.files);
+  });
+
+  fileInput.addEventListener("change", (e) => {
+    if (e.target.files?.length) handleFiles(e.target.files);
+    // allow selecting same file again later
+    e.target.value = "";
+  });
+
+  activeFileSel.addEventListener("change", () => {
+    const idx = activeFileSel.selectedIndex;
+    state.activeIndex = idx;
+    refreshUIForActiveFile();
+  });
+
+  renderBtn.addEventListener("click", renderScatter);
+
+  xColSel.addEventListener("change", renderScatter);
+  yColSel.addEventListener("change", renderScatter);
+  logX.addEventListener("change", renderScatter);
+  logY.addEventListener("change", renderScatter);
+  maxPoints.addEventListener("change", renderScatter);
+
+  // init empty plot
+  Plotly.newPlot("plot", [{
+    type: "scatter",
+    mode: "markers",
+    x: [1], y: [1],
+    marker: { opacity: 0 }
+  }], {
+    title: "Upload quant.sf to plot",
+    xaxis: { title: "X" },
+    yaxis: { title: "Y" },
+    height: 560
+  }, { responsive: true });
+
+</script>
+</body>
+</html>
