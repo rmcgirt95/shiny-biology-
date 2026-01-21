@@ -67,7 +67,7 @@
       </div>
 
       <label for="maxPoints">Max points (for speed)</label>
-      <input type="number" id="maxPoints" value="50000" min="1000" step="1000" disabled />
+      <input type="number" id="maxPoints" value="100000" min="1000" step="1000" disabled />
 
       <button id="renderBtn" disabled>Render scatter</button>
 
@@ -83,7 +83,7 @@
 
   <div class="card" style="margin-top:16px;">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
-      <div style="font-weight:600;">Preview (first 50 rows)</div>
+      <div style="font-weight:600;">Preview (first 300 rows)</div>
       <div id="stats" style="color:#555; font-size:13px;"></div>
     </div>
     <div class="table-wrap">
@@ -176,7 +176,7 @@
   }
 
   function renderPreview(columns, rows) {
-    const previewRows = rows.slice(0, 50);
+    const previewRows = rows.slice(0, 300);
     previewTable.innerHTML = "";
 
     const thead = document.createElement("thead");
@@ -236,7 +236,7 @@
     const yCol = yColSel.value;
     const doLogX = logX.checked;
     const doLogY = logY.checked;
-    const maxN = Number(maxPoints.value) || 50000;
+    const maxN = Number(maxPoints.value) || 100000;
 
     let rows = downsample(fileObj.rows, maxN);
 
