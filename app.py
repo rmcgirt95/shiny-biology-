@@ -59,6 +59,17 @@ DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ----------------- helpers -----------------
+def _is_report_zip(key: str) -> bool:
+    k = (key or "").lower()
+    # covers fastqc zip + multiqc zip + generic qc report zips
+    return k.endswith(".zip") and ("fastqc" in k or "multiqc" in k or "qc" in k)
+    
+def _local_html_name_for_key(key: str) -> str:
+    h = hashlib.sha1(key.encode("utf-8")).hexdigest()[:12]
+    base = pathlib.Path(key).name
+    base = re.sub(r"[^A-Za-z0-9_.-]+", "_", base)[:80] or "report.html"
+    return f"report_{h}_{base}"
+
 
 def _make_s3(region: str):
     cfg = Config(
@@ -69,9 +80,6 @@ def _make_s3(region: str):
         retries={"max_attempts": 3, "mode": "standard"},
     )
     return boto3.session.Session().client("s3", config=cfg)
-
-
-
 
 def _fastqc_local_name_for_key(key: str) -> str:
     # stable unique name per S3 key
@@ -84,10 +92,15 @@ def _filter_df_for_view(dff: pd.DataFrame, subfolder: str) -> pd.DataFrame:
         return dff
 
     sf = (subfolder or "").strip()
-    if sf == "FastQC/":
-        return dff[dff["key"].astype(str).str.lower().str.endswith(".html")].reset_index(drop=True)
+    low = dff["key"].astype(str).str.lower()
+
+    if sf in ("FastQC/", "QC/"):
+        # show both html + zip reports in those folders
+        m = low.str.endswith(".html") | low.str.endswith(".htm") | low.str.endswith(".zip")
+        return dff[m].reset_index(drop=True)
 
     return dff
+
 
 
 def _human_size(n: Optional[int]) -> str:
@@ -735,6 +748,61 @@ def server(input, output, session):
             status_state.set(f"Selected sample '{sample}' and auto-selected quant.sf.")
         else:
             status_state.set(f"Selected sample '{sample}', but quant.sf was not found.")
+
+    @reactive.Effect
+    @reactive.event(input.view_fastqc)
+    async def _view_fastqc():
+        key = selected_key.get()
+        if not key:
+            status_state.set("No file selected.")
+            return
+
+        k = key.lower().strip()
+
+        # -------------------------
+        # 1) ZIP reports (FastQC/QC)
+        # -------------------------
+        if _is_report_zip(k):
+            try:
+                url = await asyncio.to_thread(
+                    _extract_fastqc_zip_from_s3_to_www,
+                    s3.get(),
+                    input.bucket(),
+                    key,
+                )
+                await session.send_custom_message("open_fastqc", {"url": url})
+                status_state.set("Opened report from ZIP.")
+            except Exception as e:
+                status_state.set(f"Failed to open ZIP report: {e}")
+            return
+
+        # -------------------------
+        # 2) HTML reports (FastQC/QC)
+        # -------------------------
+        if k.endswith(".html") or k.endswith(".htm"):
+            try:
+                obj = s3.get().get_object(Bucket=input.bucket(), Key=key)
+                html = obj["Body"].read().decode("utf-8", errors="ignore")
+
+                # rewrite Images/ + Icons/ to presigned URLs
+                rewritten = _rewrite_fastqc_html(s3.get(), input.bucket(), key, html)
+
+                local_name = _local_html_name_for_key(key)
+                out_path = WWW_DOWNLOADS_DIR / local_name
+                out_path.write_text(rewritten, encoding="utf-8")
+
+                await session.send_custom_message(
+                    "open_fastqc",
+                    {"url": f"/downloads/{local_name}"},
+                )
+                status_state.set("Opened HTML report.")
+            except Exception as e:
+                status_state.set(f"Failed to open HTML report: {e}")
+            return
+
+        status_state.set("Selected file is not a ZIP report or HTML report.")
+
+       
 
     @reactive.Effect
     @reactive.event(input.pick_btn)
