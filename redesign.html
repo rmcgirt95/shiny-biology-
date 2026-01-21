@@ -5,558 +5,185 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Resources</title>
 <style>
-/* ============================================
-   OMS 4-Tier Hover Explorer (WP Custom HTML)
-   ============================================ */
-:root{
-  --oms-green-700:#2f9e44;
-  --oms-green-600:#35b24c;
-  --oms-green-100:#eaf7ee;
-  --oms-bg:#ffffff;
-  --oms-text:#0f172a;
-  --oms-muted:#475569;
-  --oms-border:#dbe5dd;
-  --oms-shadow:0 10px 24px rgba(2,6,23,.10);
-  --oms-radius:12px;
-  --oms-row-radius:10px;
+.oms-kb{
+  max-width:1200px;
+  margin:0 auto;
+  font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial;
 }
 
-.oms-hover-explorer{
-  max-width: 1200px;
-  margin: 0 auto;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+.oms-layout{
+  display:grid;
+  grid-template-columns:260px 1fr;
+  gap:18px;
 }
 
-.oms-hover-explorer .oms-title{
-  font-size: 28px;
-  font-weight: 900;
-  margin: 0 0 14px 0;
-  color: #0b1220;
+/* LEFT NAV */
+.oms-nav{
+  background:#f0faee;
+  border-radius:12px;
+  padding:12px;
+}
+.oms-nav ul{
+  list-style:none;
+  padding:0;
+  margin:0;
+}
+.oms-nav li{
+  padding:12px 14px;
+  margin-bottom:8px;
+  border-radius:8px;
+  font-weight:700;
+  cursor:pointer;
+}
+.oms-nav li.active{
+  background:#2faa49;
+  color:#fff;
 }
 
-/* The 4-column frame */
-.oms-hover-explorer .oms-frame{
-  display: grid;
-  grid-template-columns: 260px 260px 260px 260px;
-  gap: 14px;
-  align-items: start;
+/* RIGHT PANEL */
+.oms-content{
+  background:#ffffff;
+  border-radius:12px;
+  padding:16px;
+  border:1px solid #d1fae5;
 }
 
-/* Each column panel */
-.oms-hover-explorer .oms-panel{
-  background: var(--oms-bg);
-  border: 1px solid var(--oms-border);
-  border-radius: var(--oms-radius);
-  box-shadow: 0 2px 10px rgba(2,6,23,.05);
-  overflow: hidden;
-  min-height: 220px;
+/* TABLE */
+.oms-table{
+  width:100%;
+  border-collapse:collapse;
+}
+.oms-table th{
+  text-align:left;
+  padding:10px;
+  background:#2faa49;
+  color:#fff;
+}
+.oms-table td{
+  padding:10px;
+  border-bottom:1px solid #e5e7eb;
+}
+.oms-table a{
+  color:#166534;
+  font-weight:700;
+  text-decoration:none;
+}
+.oms-section{
+  margin-bottom:20px;
+}
+.oms-section h3{
+  margin:0 0 6px 0;
+  color:#14532d;
 }
 
-.oms-hover-explorer .oms-panel .oms-panel-head{
-  padding: 12px 14px;
-  font-weight: 900;
-  font-size: 14px;
-  color: #ffffff;
-  background: var(--oms-green-700);
-}
-
-.oms-hover-explorer .oms-panel .oms-panel-body{
-  padding: 10px;
-}
-
-/* List rows */
-.oms-hover-explorer .oms-list{
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: 8px;
-}
-
-.oms-hover-explorer .oms-item{
-  border-radius: var(--oms-row-radius);
-  overflow: hidden;
-  border: 1px solid transparent;
-}
-
-/* clickable row (anchor or div) */
-.oms-hover-explorer .oms-row{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 11px 12px;
-  background: var(--oms-green-100);
-  color: var(--oms-text);
-  font-weight: 800;
-  text-decoration: none;
-  cursor: pointer;
-  line-height: 1.2;
-}
-
-.oms-hover-explorer .oms-row:hover{
-  filter: brightness(.98);
-  border-color: rgba(47,158,68,.25);
-}
-
-.oms-hover-explorer .oms-row .oms-arrow{
-  opacity: .7;
-  font-weight: 900;
-}
-
-/* Active row */
-.oms-hover-explorer .oms-item.is-active{
-  border-color: rgba(47,158,68,.50);
-  box-shadow: 0 8px 18px rgba(47,158,68,.14);
-}
-
-.oms-hover-explorer .oms-item.is-active .oms-row{
-  background: #ffffff;
-}
-
-/* “Empty” panel state */
-.oms-hover-explorer .oms-empty{
-  padding: 14px 12px;
-  color: var(--oms-muted);
-  font-weight: 700;
-  background: #ffffff;
-  border-radius: 10px;
-  border: 1px dashed rgba(71,85,105,.25);
-}
-
-/* Hide your original nested markup (we convert it into panels) */
-.oms-hover-explorer .oms-source{
-  display: none;
-}
-
-/* Desktop hover behavior is handled by JS; still add focus styles */
-.oms-hover-explorer .oms-row:focus{
-  outline: 3px solid rgba(47,158,68,.35);
-  outline-offset: 2px;
-  border-radius: 10px;
-}
-
-/* Responsive: stack panels on mobile */
-@media (max-width: 1100px){
-  .oms-hover-explorer .oms-frame{
-    grid-template-columns: 1fr 1fr;
-  }
-}
-@media (max-width: 640px){
-  .oms-hover-explorer .oms-frame{
-    grid-template-columns: 1fr;
-  }
-  .oms-hover-explorer .oms-panel{
-    min-height: unset;
-  }
-}
-
-/* Mobile tip label */
-.oms-hover-explorer .oms-tip{
-  margin: 8px 0 12px 0;
-  color: var(--oms-muted);
-  font-weight: 700;
-  font-size: 13px;
-}
 </style>
 
-<div class="oms-hover-explorer" id="omsExplorer">
-  <div class="oms-title">Oligo Modification by Property</div>
-  <div class="oms-tip">Desktop: hover to drill down • Mobile: tap to drill down</div>
+<div class="oms-kb">
 
-  <!-- The new 4-column UI -->
-  <div class="oms-frame" aria-label="Oligo modification explorer">
-    <div class="oms-panel">
-      <div class="oms-panel-head">Property</div>
-      <div class="oms-panel-body">
-        <ul class="oms-list" id="omsCol1"></ul>
-      </div>
-    </div>
+  <h2>Oligo Modification by Property</h2>
 
-    <div class="oms-panel">
-      <div class="oms-panel-head">Category</div>
-      <div class="oms-panel-body">
-        <div id="omsCol2"></div>
-      </div>
-    </div>
+  <div class="oms-layout">
 
-    <div class="oms-panel">
-      <div class="oms-panel-head">Subcategory</div>
-      <div class="oms-panel-body">
-        <div id="omsCol3"></div>
-      </div>
-    </div>
+    <!-- LEFT NAV -->
+    <aside class="oms-nav">
+      <ul>
+        <li class="active" data-key="duplex">Duplex Stability</li>
+        <li data-key="nuclease">Nuclease Resistance</li>
+        <li data-key="cell">Cell Permeability</li>
+        <li data-key="isotope">Stable Isotopic Labeling</li>
+      </ul>
+    </aside>
 
-    <div class="oms-panel">
-      <div class="oms-panel-head">Detail</div>
-      <div class="oms-panel-body">
-        <div id="omsCol4"></div>
-      </div>
-    </div>
-  </div>
+    <!-- RIGHT CONTENT -->
+    <section class="oms-content" id="omsContent"></section>
 
-  <!-- SOURCE (your existing nested OMS HTML goes here) -->
-  <div class="oms-source" id="omsSource">
-    <!-- YOUR EXISTING OMS HTML START -->
-    <div class="oms-columns">
-      <div class="oms-column-item">
-        <ul class="oms-column-level-1">
-
-          <li>
-            <div>Duplex Stability</div>
-            <ul class="oms-column-level-2">
-              <li>
-                <div>Increasing Melting Temperatures</div>
-                <ul class="oms-column-level-3">
-                  <li>
-                    <div>2’-Sugar Modifications</div>
-                    <ul class="oms-column-level-4">
-                      <li><a href="https://synoligo.com/threose-nucleic-acid-modification/">Threose Nucleic Acid</a></li>
-                    </ul>
-                  </li>
-                  <li><div>Base Modifications</div></li>
-                  <li><div>5’/3’ Terminus Modifications</div></li>
-                </ul>
-              </li>
-
-              <li><div>Modulating Duplex Stability</div></li>
-            </ul>
-          </li>
-
-          <li>
-            <a href="https://synoligo.com/nuclease-resistance-modifications/">Nuclease Resistance</a>
-            <ul class="oms-column-level-2">
-              <li>
-                <a href="https://synoligo.com/nuclease-resistance-modifications/">2’-Sugar Modifications</a>
-                <ul class="oms-column-level-3">
-                  <li><a href="https://synoligo.com/threose-nucleic-acid-modification/">Threose Nucleic Acid</a></li>
-                </ul>
-              </li>
-              <li>
-                <a href="https://synoligo.com/nuclease-resistance-modifications/">Backbone Modifications</a>
-                <ul class="oms-column-level-3">
-                  <li>
-                    <div>Phosphoramidate</div>
-                    <ul class="oms-column-level-4">
-                      <li><a href="https://synoligo.com/mesyl-phosphoramidate-modification/">Mesyl</a></li>
-                    </ul>
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <div>Stereochemistry</div>
-                <ul class="oms-column-level-3">
-                  <li><a href="https://synoligo.com/stereopure-oligonucleotides-with-different-backbone-chemistries/">Stereopure</a></li>
-                </ul>
-              </li>
-              <li>
-                <div>5' Terminus of RNA</div>
-                <ul class="oms-column-level-3">
-                  <li><a href="https://synoligo.com/5-triphosphate-oligonucleotides/">5' Triphosphate Oligos</a></li>
-                </ul>
-              </li>
-            </ul>
-          </li>
-
-          <li>
-            <div>Cell Permeability</div>
-            <ul class="oms-column-level-2">
-              <li><div>Backbone Modifications</div></li>
-              <li><div>Terminus Modifiers</div></li>
-            </ul>
-          </li>
-
-          <li>
-            <div>Stable Isotopic Labeling</div>
-            <ul class="oms-column-level-2">
-              <li><a href="https://synoligo.com/stable-isotope-labeling/">34S</a></li>
-              <li><a href="https://synoligo.com/stable-isotope-labeling-18o/">18O</a></li>
-            </ul>
-          </li>
-
-        </ul>
-      </div>
-    </div>
-    <!-- YOUR EXISTING OMS HTML END -->
   </div>
 </div>
 
 <script>
-/* ============================================
-   OMS 4-Tier Hover Explorer (Desktop hover + Mobile tap)
-   - Hover/tap L1 shows L2
-   - Hover/tap L2 shows L3
-   - Hover/tap L3 shows L4
-   ============================================ */
-
-(function(){
-  var root = document.getElementById("omsExplorer");
-  if(!root) return;
-
-  var source = document.getElementById("omsSource");
-  var col1 = document.getElementById("omsCol1");
-  var col2 = document.getElementById("omsCol2");
-  var col3 = document.getElementById("omsCol3");
-  var col4 = document.getElementById("omsCol4");
-
-  function isMobile(){
-    return window.matchMedia("(max-width: 991px)").matches;
-  }
-
-  function clearActive(container){
-    if(!container) return;
-    container.querySelectorAll(".oms-item.is-active").forEach(function(li){
-      li.classList.remove("is-active");
-    });
-  }
-
-  function renderEmpty(target, text){
-    target.innerHTML = '<div class="oms-empty">' + text + '</div>';
-  }
-
-  function getLabelAndHref(node){
-    // node can be <li> or <a> or <div>
-    // We expect LIs contain either direct <a> or direct <div>
-    var a = node.querySelector(":scope > a");
-    var d = node.querySelector(":scope > div");
-    if(a){
-      return { label: (a.textContent || "").trim(), href: a.getAttribute("href") || "" };
+const data = {
+  duplex: [
+    {
+      title: "Increasing Melting Temperatures",
+      rows: [
+        {
+          header: "2’-Sugar Modifications",
+          items: [
+            { label: "Threose Nucleic Acid", url: "https://synoligo.com/threose-nucleic-acid-modification/" }
+          ]
+        },
+        { header: "Base Modifications", items: [] },
+        { header: "5’/3’ Terminus Modifications", items: [] }
+      ]
+    },
+    {
+      title: "Modulating Duplex Stability",
+      rows: []
     }
-    if(d){
-      return { label: (d.textContent || "").trim(), href: "" };
-    }
-    return { label: (node.textContent || "").trim(), href: "" };
-  }
-
-  function getChildUL(li, levelClass){
-    return li.querySelector(":scope > ul." + levelClass) || null;
-  }
-
-  function buildListFromUL(ul, level, onSelect){
-    // returns an <ul class="oms-list"> element
-    var list = document.createElement("ul");
-    list.className = "oms-list";
-    var items = Array.from(ul.querySelectorAll(":scope > li"));
-
-    if(items.length === 0){
-      var wrap = document.createElement("div");
-      wrap.appendChild(list);
-      return wrap;
-    }
-
-    items.forEach(function(li){
-      var meta = getLabelAndHref(li);
-
-      var item = document.createElement("li");
-      item.className = "oms-item";
-
-      var row;
-      if(meta.href){
-        row = document.createElement("a");
-        row.href = meta.href;
-        row.target = "_self";
-        row.rel = "noopener";
-      } else {
-        row = document.createElement("div");
-      }
-      row.className = "oms-row";
-      row.setAttribute("tabindex", "0");
-
-      var label = document.createElement("span");
-      label.textContent = meta.label;
-
-      var arrow = document.createElement("span");
-      arrow.className = "oms-arrow";
-
-      // show arrow if has children at next level
-      var hasNext =
-        (level === 1 && !!getChildUL(li, "oms-column-level-2")) ||
-        (level === 2 && !!getChildUL(li, "oms-column-level-3")) ||
-        (level === 3 && !!getChildUL(li, "oms-column-level-4"));
-
-      arrow.textContent = hasNext ? "▸" : "";
-
-      row.appendChild(label);
-      row.appendChild(arrow);
-      item.appendChild(row);
-      list.appendChild(item);
-
-      function activate(){
-        clearActive(list);
-        item.classList.add("is-active");
-        onSelect(li);
-      }
-
-      // Desktop: hover opens. Mobile: tap opens.
-      row.addEventListener("mouseenter", function(){
-        if(isMobile()) return;
-        activate();
-      });
-
-      row.addEventListener("focus", function(){
-        activate();
-      });
-
-      row.addEventListener("click", function(e){
-        // If it’s a link, let it navigate, BUT on mobile we still want tap-to-open first.
-        // So: if it has children and we're mobile, prevent navigation on first tap.
-        if(isMobile() && meta.href && hasNext){
-          e.preventDefault();
-          activate();
-        } else if(!meta.href){
-          e.preventDefault();
-          activate();
+  ],
+  nuclease: [
+    {
+      title: "2’-Sugar Modifications",
+      rows: [
+        {
+          header: "Subcategory",
+          items: [
+            { label: "Threose Nucleic Acid", url: "https://synoligo.com/threose-nucleic-acid-modification/" }
+          ]
         }
-      });
-
-      row.addEventListener("keydown", function(e){
-        if(e.key === "Enter" || e.key === " "){
-          e.preventDefault();
-          activate();
+      ]
+    }
+  ],
+  cell: [],
+  isotope: [
+    {
+      title: "Stable Isotopes",
+      rows: [
+        {
+          header: "Isotopes",
+          items: [
+            { label: "34S", url: "https://synoligo.com/stable-isotope-labeling/" },
+            { label: "18O", url: "https://synoligo.com/stable-isotope-labeling-18o/" }
+          ]
         }
+      ]
+    }
+  ]
+};
+
+const content = document.getElementById("omsContent");
+const navItems = document.querySelectorAll(".oms-nav li");
+
+function render(key){
+  content.innerHTML = "";
+  (data[key] || []).forEach(section=>{
+    const div = document.createElement("div");
+    div.className = "oms-section";
+    div.innerHTML = `<h3>${section.title}</h3>`;
+    if(section.rows.length){
+      const table = document.createElement("table");
+      table.className = "oms-table";
+      section.rows.forEach(r=>{
+        table.innerHTML += `<tr><th colspan="2">${r.header}</th></tr>`;
+        r.items.forEach(i=>{
+          table.innerHTML += `<tr><td><a href="${i.url}">${i.label}</a></td></tr>`;
+        });
       });
-    });
-
-    var wrap2 = document.createElement("div");
-    wrap2.appendChild(list);
-    return wrap2;
-  }
-
-  // Step render functions
-  function showLevel4FromLI(li3){
-    var ul4 = getChildUL(li3, "oms-column-level-4");
-    clearActive(col4);
-    if(!ul4){
-      renderEmpty(col4, "Hover a subcategory to see details.");
-      return;
+      div.appendChild(table);
     }
-    col4.innerHTML = "";
-    col4.appendChild(buildListFromUL(ul4, 4, function(){ /* no deeper */ }));
-  }
-
-  function showLevel3FromLI(li2){
-    var ul3 = getChildUL(li2, "oms-column-level-3");
-    col4.innerHTML = "";
-    if(!ul3){
-      renderEmpty(col3, "Hover a category to see subcategories.");
-      renderEmpty(col4, "Hover a subcategory to see details.");
-      return;
-    }
-    col3.innerHTML = "";
-    col3.appendChild(buildListFromUL(ul3, 3, function(li3){
-      showLevel4FromLI(li3);
-    }));
-    renderEmpty(col4, "Hover a subcategory to see details.");
-  }
-
-  function showLevel2FromLI(li1){
-    var ul2 = getChildUL(li1, "oms-column-level-2");
-    col3.innerHTML = "";
-    col4.innerHTML = "";
-    if(!ul2){
-      renderEmpty(col2, "No categories available.");
-      renderEmpty(col3, "Hover a category to see subcategories.");
-      renderEmpty(col4, "Hover a subcategory to see details.");
-      return;
-    }
-    col2.innerHTML = "";
-    col2.appendChild(buildListFromUL(ul2, 2, function(li2){
-      showLevel3FromLI(li2);
-    }));
-    renderEmpty(col3, "Hover a category to see subcategories.");
-    renderEmpty(col4, "Hover a subcategory to see details.");
-  }
-
-  // Build Level 1 from source
-  var l1 = source.querySelector(".oms-column-level-1");
-  if(!l1){
-    col1.innerHTML = "";
-    renderEmpty(col2, "Could not find oms-column-level-1 in source.");
-    renderEmpty(col3, "—");
-    renderEmpty(col4, "—");
-    return;
-  }
-
-  // Render column 1
-  col1.innerHTML = "";
-  Array.from(l1.querySelectorAll(":scope > li")).forEach(function(li1){
-    var meta = getLabelAndHref(li1);
-
-    var item = document.createElement("li");
-    item.className = "oms-item";
-
-    var row;
-    if(meta.href){
-      row = document.createElement("a");
-      row.href = meta.href;
-      row.target = "_self";
-      row.rel = "noopener";
-    } else {
-      row = document.createElement("div");
-    }
-    row.className = "oms-row";
-    row.setAttribute("tabindex", "0");
-
-    var label = document.createElement("span");
-    label.textContent = meta.label;
-
-    var arrow = document.createElement("span");
-    arrow.className = "oms-arrow";
-    arrow.textContent = getChildUL(li1, "oms-column-level-2") ? "▸" : "";
-
-    row.appendChild(label);
-    row.appendChild(arrow);
-    item.appendChild(row);
-    col1.appendChild(item);
-
-    function activate(){
-      clearActive(col1);
-      item.classList.add("is-active");
-      showLevel2FromLI(li1);
-    }
-
-    row.addEventListener("mouseenter", function(){
-      if(isMobile()) return;
-      activate();
-    });
-
-    row.addEventListener("focus", function(){
-      activate();
-    });
-
-    row.addEventListener("click", function(e){
-      var hasNext = !!getChildUL(li1, "oms-column-level-2");
-      if(isMobile() && meta.href && hasNext){
-        e.preventDefault();
-        activate();
-      } else if(!meta.href){
-        e.preventDefault();
-        activate();
-      }
-    });
-
-    row.addEventListener("keydown", function(e){
-      if(e.key === "Enter" || e.key === " "){
-        e.preventDefault();
-        activate();
-      }
-    });
+    content.appendChild(div);
   });
+}
 
-  // Initial empty states
-  renderEmpty(col2, "Hover a property to see categories.");
-  renderEmpty(col3, "Hover a category to see subcategories.");
-  renderEmpty(col4, "Hover a subcategory to see details.");
+navItems.forEach(li=>{
+  li.addEventListener("click",()=>{
+    navItems.forEach(n=>n.classList.remove("active"));
+    li.classList.add("active");
+    render(li.dataset.key);
+  });
+});
 
-  // Optional: auto-open first item on desktop for better first impression
-  setTimeout(function(){
-    if(!isMobile()){
-      var first = col1.querySelector(".oms-item .oms-row");
-      if(first) first.dispatchEvent(new Event("mouseenter"));
-    }
-  }, 50);
-
-})();
+render("duplex");
 </script>
 </body>
 </html>
