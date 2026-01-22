@@ -1,544 +1,698 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Resources</title>
-<!-- ==========================================================
- OMS Browse Layout (Tier1 left nav -> right table)
- Rules:
- - If it's an <a> anywhere -> clickable
- - If it's a <div> at tiers 2-4 -> header only (not clickable)
- - Breadcrumbs shown above table
- Paste into a WordPress "Custom HTML" block.
-=========================================================== -->
-
+<!-- =========================
+     Oligo Modification Series – Table UI
+     (Internal CSS + Internal JS)
+========================== -->
 <style>
-:root{
-  --g700:#2f9e44;
-  --g600:#35b24c;
-  --g100:#eaf7ee;
-  --text:#0f172a;
-  --muted:#475569;
-  --border:#dbe5dd;
-  --shadow:0 10px 24px rgba(2,6,23,.10);
-  --radius:12px;
-}
+  :root{
+    --bg:#ffffff;
+    --page:#f7fafc;
+    --ink:#0f172a;
+    --muted:#475569;
+    --line:#e5e7eb;
+    --shadow:0 10px 30px rgba(2,6,23,.06);
 
-.oms-browse{
-  max-width:1200px;
-  margin:0 auto;
-  font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color:var(--text);
-}
+    --green-500:#3bb43b;
+    --green-100:#e9f7e9;
+    --blue-800:#1f4f8a;
+  }
 
-.oms-browse h2{
-  font-size:28px;
-  font-weight:900;
-  margin:0 0 14px 0;
-}
+  *{ box-sizing:border-box; }
+  body{ margin:0; }
 
-.oms-layout{
+  .oms-series-wrap{
+    background: var(--page);
+    padding: 24px 0 48px 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    color: var(--ink);
+  }
+
+  .oms-series{
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 18px;
+  }
+
+  .oms-hero{
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 22px 24px;
+  }
+
+  .oms-hero h1{
+    margin: 0 0 10px 0;
+    font-size: 34px;
+    line-height: 1.15;
+    font-weight: 900;
+    color: var(--blue-800);
+    text-align: center;
+  }
+
+  .oms-hero h2{
+    margin: 8px 0 6px 0;
+    font-size: 16px;
+    font-weight: 900;
+  }
+
+  .oms-hero p{
+    margin: 0 0 12px 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .oms-banner{
+    margin: 12px 0 0 0;
+    background: #2f5a96;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .oms-banner a{ color:#fff; text-decoration:underline; }
+
+  .oms-browse{ margin-top: 18px; }
+
+  .oms-card{
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .oms-card-head{
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap: 12px;
+    background: #fbfdff;
+  }
+
+  .oms-card-head .title{
+    margin:0;
+    font-size: 16px;
+    font-weight: 950;
+    letter-spacing: .1px;
+  }
+.oms-cell{ cursor: pointer; }
+.oms-open{ cursor: pointer; }
+
+  /* ===== 3-column table like screenshot ===== */
+.oms-property-grid{
   display:grid;
-  grid-template-columns:290px 1fr;
-  gap:16px;
-  align-items:start;
-}
-
-/* Left nav */
-.oms-nav{
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  box-shadow:0 2px 10px rgba(2,6,23,.05);
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--line);
+  border-radius: 10px;
   overflow:hidden;
-}
-
-.oms-nav-head{
-  background:var(--g700);
-  color:#fff;
-  padding:12px 14px;
-  font-weight:900;
-  font-size:14px;
-}
-
-.oms-nav-list{
-  list-style:none;
-  padding:10px;
-  margin:0;
-  display:grid;
-  gap:8px;
-}
-
-.oms-nav-item{
-  border-radius:10px;
-  overflow:hidden;
-  border:1px solid transparent;
-}
-
-.oms-nav-btn{
-  width:100%;
-  border:0;
-  background:var(--g100);
-  color:var(--text);
-  font-weight:900;
-  padding:12px 12px;
-  border-radius:10px;
-  text-align:left;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-}
-
-.oms-nav-btn:hover{
-  filter:brightness(.98);
-}
-
-.oms-nav-item.active{
-  border-color:rgba(47,158,68,.45);
-  box-shadow:0 8px 18px rgba(47,158,68,.12);
-}
-
-.oms-nav-item.active .oms-nav-btn{
   background:#fff;
 }
 
-.oms-nav-linkline{
-  margin-top:6px;
-  padding:0 2px 0 2px;
+.oms-col.is-hidden{ display:none; }
+
+@media (max-width: 900px){
+  .oms-property-grid{ grid-template-columns: 1fr; }
 }
 
-.oms-nav-linkline a{
-  color:#166534;
-  font-weight:800;
-  text-decoration:none;
-  font-size:13px;
+
+/* When columns hide, grid should shrink automatically */
+.oms-property-grid{
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
 }
 
-/* Right panel */
-.oms-content{
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  box-shadow:0 2px 10px rgba(2,6,23,.05);
-  overflow:hidden;
+  .oms-col{
+    border-right: 1px solid var(--line);
+    background:#fff;
+  }
+  .oms-col:last-child{ border-right:none; }
+
+  .oms-col ul{
+    list-style:none;
+    padding:0;
+    margin:0;
+  }
+
+  .oms-cell{
+    width:100%;
+    text-align:left;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    background: var(--green-100);
+    color: var(--ink);
+    padding: 10px 12px;
+    font-weight: 900;
+    cursor: pointer;
+    display:block;
+    text-decoration:none;
+    font-size: 13px;
+   position: relative;
+  padding-right: 34px; /* room for icon */
 }
 
-.oms-content-head{
-  padding:12px 14px;
-  background:#f8fafc;
-  border-bottom:1px solid rgba(71,85,105,.15);
-}
-
-.oms-breadcrumbs{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  align-items:center;
-  font-weight:800;
-  color:var(--muted);
-  font-size:13px;
-}
-
-.oms-crumb{
+/* Hide by default; show on hover */
+.oms-open{
+  position:absolute;
+  top:50%;
+  right:10px;
+  transform:translateY(-50%);
   display:inline-flex;
   align-items:center;
-  gap:8px;
+  justify-content:center;
+
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: none;
+
+  background: rgba(15,23,42,.10);
+  color: inherit;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s ease, transform .15s ease;
+}
+/* Hover highlight like your screenshot */
+.oms-cell:hover{
+  background: var(--green-500);
+  color: #fff;
+}
+.oms-cell:hover .oms-open{
+  opacity: 1;
+  color: #fff;
 }
 
-.oms-sep{
-  opacity:.65;
+/* Show only when hovering the cell */
+.oms-cell:hover .oms-open{
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) scale(1.03);
 }
 
-.oms-breadcrumbs a{
-  color:#166534;
-  text-decoration:none;
-  font-weight:900;
+/* Make it stand out on active (green) cells */
+.oms-cell.is-active .oms-open{
+  background: rgba(255,255,255,.22);
+  color: #fff;
 }
 
-.oms-content-body{
-  padding:16px;
+/* Optional: nicer hover for the pill */
+.oms-open:hover{
+  text-decoration: underline;
+  filter: brightness(1.05);
 }
 
-/* Sections + table */
-.oms-section{
-  margin:0 0 22px 0;
-}
+  .oms-cell.is-active{
+    background: var(--green-500);
+    color:#fff;
+  }
 
-.oms-section-title{
-  font-size:18px;
-  font-weight:900;
-  margin:0 0 10px 0;
-  color:#14532d;
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
+  .oms-cell.is-muted{
+    opacity:.95;
+    font-weight: 850;
+  }
 
-.oms-section-title a{
-  color:#166534;
-  text-decoration:none;
-  font-weight:900;
-  font-size:13px;
-}
+  .oms-col li:last-child .oms-cell{ border-bottom:none; }
 
-.oms-table{
-  width:100%;
-  border-collapse:collapse;
-  border:1px solid rgba(71,85,105,.12);
-  border-radius:10px;
-  overflow:hidden;
-}
-
-.oms-table th{
-  background:var(--g700);
-  color:#fff;
-  padding:10px 12px;
-  text-align:left;
-  font-weight:900;
-}
-
-.oms-table td{
-  padding:10px 12px;
-  border-bottom:1px solid rgba(71,85,105,.14);
-  background:#fff;
-}
-
-.oms-table tr:last-child td{
-  border-bottom:0;
-}
-
-.oms-table a{
-  color:#166534;
-  font-weight:900;
-  text-decoration:none;
-}
-
-.oms-leaf{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-}
-
-.oms-leaf small{
-  color:var(--muted);
-  font-weight:800;
-}
-
-/* Empty */
-.oms-placeholder{
-  color:var(--muted);
-  font-weight:800;
-  padding:14px;
-  background:#fff;
-  border:1px dashed rgba(71,85,105,.25);
-  border-radius:10px;
-}
-
-/* Responsive */
-@media (max-width: 980px){
-  .oms-layout{ grid-template-columns:1fr; }
-}
+  @media (max-width: 900px){
+    .oms-property-grid{ grid-template-columns: 1fr; }
+    .oms-col{ border-right:none; border-bottom:1px solid var(--line); }
+    .oms-col:last-child{ border-bottom:none; }
+  }
 </style>
 
-<div class="oms-browse" id="omsBrowse">
-  <h2>Oligo Modification by Property</h2>
+<div class="oms-series-wrap">
+  <div class="oms-series">
+    <div class="oms-hero">
+      <h1>Oligo Modification Series</h1>
 
-  <div class="oms-layout">
-    <!-- LEFT NAV -->
-    <aside class="oms-nav" aria-label="Property navigation">
-      <div class="oms-nav-head"></div>
-      <ul class="oms-nav-list" id="omsNav"></ul>
-    </aside>
+      <h2>What are modified oligonucleotides?</h2>
+      <p>
+        Oligonucleotides are vital components in biological workflows (DNA/RNA), supporting gene regulation,
+        expression control, and research tools. Modifications can improve stability, specificity, safety,
+        and functionality — enabling better performance across many applications.
+      </p>
 
-    <!-- RIGHT PANEL -->
-    <section class="oms-content" aria-label="Details">
-      <div class="oms-content-head">
-        <div class="oms-breadcrumbs" id="omsBreadcrumbs">
-          <span class="oms-crumb"><span>Home</span></span>
-          <span class="oms-sep">›</span>
-          <span class="oms-crumb"><span>Select a property</span></span>
+      <div class="oms-banner">
+        READ OUR LATEST BLOG POST:
+        <a href="https://synoligo.com/an-introduction-to-splice-switching-oligonucleotides/" target="_blank" rel="noopener">
+          An Introduction to Splice-Switching Oligonucleotides
+        </a>
+      </div>
+
+      <!-- =========================
+           TABLE UI #1: PROPERTY
+      ========================== -->
+      <div class="oms-browse" data-oms="browse">
+        <div class="oms-card">
+          <div class="oms-card-head">
+            <div class="title">Oligo Modification by Property</div>
+          </div>
+
+          <div style="padding:12px;">
+            <div class="oms-property-grid">
+  <div class="oms-col"><ul data-oms="col1"></ul></div>
+  <div class="oms-col"><ul data-oms="col2"></ul></div>
+  <div class="oms-col"><ul data-oms="col3"></ul></div>
+  <div class="oms-col"><ul data-oms="col4"></ul></div>
+</div>
+
+          </div>
+
+          <!-- SOURCE HTML (hidden) -->
+          <div data-oms="source" style="display:none;">
+            <!-- ✅ Put your EXACT property UL here -->
+            <div class="oms-column-item">
+              <ul class="oms-column-level-1">
+                <li class="">
+                  <div>Duplex Stability</div>
+                  <ul class="oms-column-level-2 d-lg-block">
+                    <li class="">
+                      <div>Increasing Melting Temperatures</div>
+                      <ul class="oms-column-level-3 d-lg-block">
+                        <li class=""><div>2’-Sugar Modifications</div>
+                          <ul class="oms-column-level-4 d-lg-none">
+                            <li class="active"><a href="https://synoligo.com/threose-nucleic-acid-modification/" target="_self">Threose Nucleic Acid</a></li>
+                          </ul>
+                        </li>
+                        <li class=""><div>Base Modifications</div></li>
+                        <li class=""><div>5’/3’ Terminus Modifications</div></li>
+                      </ul>
+                    </li>
+                    <li class=""><div>Modulating Duplex Stability</div></li>
+                  </ul>
+                </li>
+
+                <li class="">
+                  <a href="https://synoligo.com/nuclease-resistance-modifications/" target="_self">Nuclease Resistance</a>
+                  <ul class="oms-column-level-2 d-lg-none">
+                    <li class="">
+                      <a href="https://synoligo.com/nuclease-resistance-modifications/" target="_self">2’-Sugar Modifications</a>
+                      <ul class="oms-column-level-3 d-lg-block">
+                        <li class="active"><a href="https://synoligo.com/threose-nucleic-acid-modification/" target="_self">Threose Nucleic Acid</a></li>
+                      </ul>
+                    </li>
+
+                    <li class="">
+                      <a href="https://synoligo.com/nuclease-resistance-modifications/" target="_self">Backbone Modifications</a>
+                      <ul class="oms-column-level-3 d-lg-none">
+                        <li class="">
+                          <div>Phosphoramidate</div>
+                          <ul class="oms-column-level-4 d-lg-block">
+                            <li><a href="https://synoligo.com/mesyl-phosphoramidate-modification/" target="_self">Mesyl</a></li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </li>
+
+                    <li class=""><div>Stereochemistry</div>
+                      <ul class="oms-column-level-3 d-lg-none">
+                        <li class="active"><a href="https://synoligo.com/stereopure-oligonucleotides-with-different-backbone-chemistries/" target="_self">Stereopure</a></li>
+                      </ul>
+                    </li>
+
+                    <li class=""><div>5' Terminus of RNA</div>
+                      <ul class="oms-column-level-3 d-lg-none">
+                        <li class="active"><a href="https://synoligo.com/5-triphosphate-oligonucleotides/" target="_self">5' Triphosphate Oligos</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+
+                <li class="">
+                  <div>Cell Permeability</div>
+                  <ul class="oms-column-level-2 d-lg-none">
+                    <li class="active"><div>Backbone Modifications</div></li>
+                    <li class=""><div>Terminus Modifiers</div></li>
+                  </ul>
+                </li>
+
+                <li class="">
+                  <div>Stable Isotopic Labeling</div>
+                  <ul class="oms-column-level-2 d-lg-none">
+                    <li class="active"><a href="https://synoligo.com/stable-isotope-labeling/" target="_self">34S</a></li>
+                    <li class=""><a href="https://synoligo.com/stable-isotope-labeling-18o/" target="_self">18O</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </div>
+
         </div>
       </div>
-      <div class="oms-content-body" id="omsContent">
-        <div class="oms-placeholder">Select a category on the left to view details.</div>
+
+      <!-- =========================
+           TABLE UI #2: APPLICATION
+      ========================== -->
+      <div class="oms-browse" data-oms="browse" style="margin-top:18px;">
+        <div class="oms-card">
+          <div class="oms-card-head">
+            <div class="title">Oligo Modification by Application</div>
+          </div>
+
+          <div style="padding:12px;">
+            <div class="oms-property-grid">
+              <div class="oms-col"><ul data-oms="col1"></ul></div>
+              <div class="oms-col"><ul data-oms="col2"></ul></div>
+              <div class="oms-col"><ul data-oms="col3"></ul></div>
+            </div>
+          </div>
+
+          <div data-oms="source" style="display:none;">
+            <div class="oms-column-item">
+              <ul class="oms-column-level-1">
+                <li class=""><div>Genome Editing</div>
+                  <ul class="oms-column-level-2 d-lg-none">
+                    <li class="active"><a href="https://synoligo.com/ultra-long-oligos/" target="_self">Ultra-Long Oligos</a></li>
+                  </ul>
+                </li>
+
+                <li class=""><div>mRNA Editing</div>
+                  <ul class="oms-column-level-2 d-lg-none">
+                    <li class=""><a href="https://synoligo.com/isouridine-n3u-in-adar-editing/" target="_self">ADAR Editing</a></li>
+                    <li class="active"><a href="https://synoligo.com/antisense-oligos-morpholinos-modifying-splicing-and-applications-in-duchenne-muscular-dystrophy/" target="_self">Splice-switching using PMOs</a></li>
+                  </ul>
+                </li>
+
+                <li class=""><div>Spatial Transcriptomics</div>
+                  <ul class="oms-column-level-2 d-lg-none">
+                    <li class="active"><a href="https://synoligo.com/merfish-probes-for-spatial-transcriptomics/" target="_self">MERFISH Probes</a></li>
+                  </ul>
+                </li>
+
+                <li class=""><div>Time-Gated Detection</div>
+                  <ul class="oms-column-level-2 d-lg-none">
+                    <li><a href="https://synoligo.com/lumi804-eu-an-exceptional-lanthanide-probe-for-time-resolved-photoluminescence/" target="_self">Lanthanide-Europium Based Dye Chemistry (Lumi804-Eu)</a></li>
+                  </ul>
+                </li>
+
+                <li class="active"><div>RNA Splicing/Switching</div>
+                  <ul class="oms-column-level-2 d-lg-block">
+                    <li class="active"><a href="https://synoligo.com/an-introduction-to-splice-switching-oligonucleotides/" target="_blank">Splice-Switching Oligos (PMO)</a></li>
+                  </ul>
+                </li>
+
+                <li class=""><div>Oligonucleotide Conjugation</div>
+                  <ul class="oms-column-level-2 d-lg-none">
+                    <li><a href="https://synoligo.com/choosing-linkers-for-antibody-oligonucleotide-conjugates/" target="_self">Cleavable Linkers (AOCs vs ADCs)</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
       </div>
-    </section>
-  </div>
 
-  <!-- ==========================================================
-       SOURCE HTML (Hidden)
-       Paste your provided OMS HTML here UNCHANGED.
-       ========================================================== -->
-  <div id="omsSource" style="display:none;">
-    <div class="oms-column-item">
-      <ul class="oms-column-level-1">
-        <li class="">
-          <div>Duplex Stability </div>
-          <ul class="oms-column-level-2 d-lg-none">
-            <li>
-              <div>Increasing Melting Temperatures</div>
-              <ul class="oms-column-level-3 d-lg-none">
-                <li>
-                  <div>2’-Sugar Modifications</div>
-                  <ul class="oms-column-level-4 d-lg-none">
-                    <li><a href="https://synoligo.com/threose-nucleic-acid-modification/" target="_self">Threose Nucleic Acid</a></li>
-                  </ul>
-                </li>
-                <li><div>Base Modifications</div></li>
-                <li><div>5’/3’ Terminus Modifications</div></li>
-              </ul>
-            </li>
-            <li><div>Modulating Duplex Stability </div></li>
-          </ul>
-        </li>
-
-        <li class="active">
-          <a href="https://synoligo.com/nuclease-resistance-modifications/" target="_self">Nuclease Resistance</a>
-          <ul class="oms-column-level-2 d-lg-block">
-            <li class="">
-              <a href="https://synoligo.com/nuclease-resistance-modifications/" target="_self">2’-Sugar Modifications</a>
-              <ul class="oms-column-level-3 d-lg-none">
-                <li class="active">
-                  <a href="https://synoligo.com/threose-nucleic-acid-modification/" target="_self">Threose Nucleic Acid</a>
-                </li>
-              </ul>
-            </li>
-
-            <li class="active">
-              <a href="https://synoligo.com/nuclease-resistance-modifications/" target="_self">Backbone Modifications</a>
-              <ul class="oms-column-level-3 d-lg-block">
-                <li class="active">
-                  <div>Phosphoramidate</div>
-                  <ul class="oms-column-level-4 d-lg-block">
-                    <li><a href="https://synoligo.com/mesyl-phosphoramidate-modification/" target="_self">Mesyl</a></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-
-            <li>
-              <div>Stereochemistry</div>
-              <ul class="oms-column-level-3 d-lg-none">
-                <li><a href="https://synoligo.com/stereopure-oligonucleotides-with-different-backbone-chemistries/" target="_self">Stereopure</a></li>
-              </ul>
-            </li>
-
-            <li>
-              <div>5' Terminus of RNA</div>
-              <ul class="oms-column-level-3 d-lg-none">
-                <li><a href="https://synoligo.com/5-triphosphate-oligonucleotides/" target="_self">5' Triphosphate Oligos</a></li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-
-        <li>
-          <div>Cell Permeability</div>
-          <ul class="oms-column-level-2 d-lg-none">
-            <li><div>Backbone Modifications</div></li>
-            <li><div>Terminus Modifiers </div></li>
-          </ul>
-        </li>
-
-        <li>
-          <div>Stable Isotopic Labeling</div>
-          <ul class="oms-column-level-2 d-lg-none">
-            <li><a href="https://synoligo.com/stable-isotope-labeling/" target="_self">34S</a></li>
-            <li><a href="https://synoligo.com/stable-isotope-labeling-18o/" target="_self">18O</a></li>
-          </ul>
-        </li>
-      </ul>
     </div>
   </div>
 </div>
 
 <script>
-/* ==========================================================
-   OMS Browse Layout Script
-   - Builds Tier1 left navigation from source HTML
-   - Right panel shows:
-     - Breadcrumbs (Home › Tier1)
-     - Sections for Tier2
-     - For each Tier2:
-       - If Tier3 exists: table headers (Tier3) + rows (Tier4 anchors)
-       - If no Tier3: list any anchors directly under Tier2 as rows
-   - Click rule: <a> stays clickable; <div> are headers only
-=========================================================== */
-
 (function(){
-  const root = document.getElementById("omsBrowse");
-  if(!root) return;
+  "use strict";
 
-  const source = document.getElementById("omsSource");
-  const nav = document.getElementById("omsNav");
-  const content = document.getElementById("omsContent");
-  const crumbs = document.getElementById("omsBreadcrumbs");
+  function cleanText(s){
+    return (s || "").replace(/\s+/g, " ").trim();
+  }
+function hasChildren(item){
+  return item.children && item.children.length > 0;
+}
 
-  const l1Items = source.querySelectorAll(".oms-column-level-1 > li");
-
-  function textFromTier(li){
+  function directLink(li){
     const a = li.querySelector(":scope > a");
+    if (!a) return null;
+    return {
+      href: a.getAttribute("href") || "#",
+      target: a.getAttribute("target") || "_self",
+      text: cleanText(a.textContent)
+    };
+  }
+
+  function directLabel(li){
+    const a = li.querySelector(":scope > a");
+    if (a) return cleanText(a.textContent);
     const d = li.querySelector(":scope > div");
-    if(a) return (a.textContent || "").trim();
-    if(d) return (d.textContent || "").trim();
-    return (li.textContent || "").trim();
+    if (d) return cleanText(d.textContent);
+    return cleanText(li.textContent);
   }
 
-  function hrefFromTier(li){
-    const a = li.querySelector(":scope > a");
-    return a ? (a.getAttribute("href") || "") : "";
+  function firstDescendantLink(li){
+    const a = li.querySelector("a");
+    if (!a) return null;
+    return {
+      href: a.getAttribute("href") || "#",
+      target: a.getAttribute("target") || "_self",
+      text: cleanText(a.textContent)
+    };
   }
 
-  function setBreadcrumbs(tier1Label, tier1Href){
-    // Home › Tier1 (Tier1 clickable if it has <a>)
-    const home = `<span class="oms-crumb"><span>Home</span></span>`;
-    const sep = `<span class="oms-sep">›</span>`;
-    const t1 = tier1Href
-      ? `<span class="oms-crumb"><a href="${tier1Href}">${tier1Label}</a></span>`
-      : `<span class="oms-crumb"><span>${tier1Label}</span></span>`;
-    crumbs.innerHTML = home + sep + t1;
+  function childLis(li){
+    const ul = li.querySelector(":scope > ul");
+    if (!ul) return [];
+    return Array.from(ul.children).filter(x => x.tagName === "LI");
   }
 
-  function rowHTMLFromAnchor(a){
-    const label = (a.textContent || "").trim();
-    const url = a.getAttribute("href") || "#";
-    return `<tr><td><div class="oms-leaf"><a href="${url}" target="${a.getAttribute("target") || "_self"}" rel="noopener">${label}</a><small>→</small></div></td></tr>`;
+  // Parse to 4 levels; if a level doesn't exist, children = []
+ function parseLevel1(source){
+  const root = source.querySelector(".oms-column-level-1");
+  if (!root) return [];
+  const lis = Array.from(root.children).filter(x => x.tagName === "LI");
+
+  return lis.map(li => ({
+    li,
+    label: directLabel(li),
+    link: directLink(li) || firstDescendantLink(li),
+    children: childLis(li).map(l2 => ({
+      li: l2,
+      label: directLabel(l2),
+      link: directLink(l2) || firstDescendantLink(l2),
+      children: childLis(l2).map(l3 => ({
+        li: l3,
+        label: directLabel(l3),
+        link: directLink(l3) || firstDescendantLink(l3),
+        children: childLis(l3).map(l4 => ({
+          li: l4,
+          label: directLabel(l4),
+          link: directLink(l4) || firstDescendantLink(l4),
+          children: childLis(l4).map(l5 => ({   // ✅ supports deeper if ever needed
+            li: l5,
+            label: directLabel(l5),
+            link: directLink(l5) || firstDescendantLink(l5),
+            children: []
+          }))
+        }))
+      }))
+    }))
+  })).filter(x => x.label);
+}
+
+
+  function findActiveIndex(list){
+    const idx = list.findIndex(x => x.li && x.li.classList.contains("active"));
+    return idx >= 0 ? idx : 0;
   }
 
-  function renderTier1(li1){
-    const tier1Label = textFromTier(li1);
-    const tier1Href = hrefFromTier(li1);
+function itemHasChildren(item){
+  return Array.isArray(item.children) && item.children.length > 0;
+}
 
-    setBreadcrumbs(tier1Label, tier1Href);
-    content.innerHTML = "";
+function makeCell(item, isActive, onActivate){
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "oms-cell" + (isActive ? " is-active" : "");
+  btn.appendChild(document.createTextNode(item.label));
 
-    const l2 = li1.querySelectorAll(":scope > ul.oms-column-level-2 > li");
-    if(!l2.length){
-      content.innerHTML = `<div class="oms-placeholder">No items available under <strong>${tier1Label}</strong>.</div>`;
-      return;
-    }
+  const hasKids = itemHasChildren(item);
+  const hasLink = !!item.link;
 
-    l2.forEach(li2=>{
-      const section = document.createElement("div");
-      section.className = "oms-section";
+  // ✅ Parent behavior: hover + click activates table (NO navigation)
+  if (hasKids && typeof onActivate === "function"){
+    btn.addEventListener("mouseenter", onActivate);
+    btn.addEventListener("focus", onActivate);
+    btn.addEventListener("click", onActivate);
+    btn.classList.add("has-children");
+    btn.style.cursor = "pointer";
+  }
 
-      const tier2Label = textFromTier(li2);
-      const tier2Href = hrefFromTier(li2);
+  // ✅ Add link icon if there is a link (icon navigates, not the cell)
+  if (hasLink){
+    const a = document.createElement("a");
+    a.className = "oms-open";
+    a.href = item.link.href;
+    a.target = item.link.target || "_self";
+    a.rel = "noopener";
+    a.textContent = "↗";
+    a.addEventListener("click", function(e){
+      e.stopPropagation(); // don’t trigger expand
+    });
+    btn.appendChild(a);
+  }
 
-      // Section title (Tier2). If it's an <a> in source, make it clickable.
-      const title = document.createElement("div");
-      title.className = "oms-section-title";
-      title.innerHTML = tier2Href
-        ? `${tier2Label} <a href="${tier2Href}" target="_self" rel="noopener">(view)</a>`
-        : `${tier2Label}`;
+  // ✅ Leaf with no kids: if no link, still show but disable
+  if (!hasKids && !hasLink){
+    btn.classList.add("is-muted");
+    btn.disabled = true;
+    btn.style.cursor = "default";
+  }
 
-      section.appendChild(title);
+  return btn;
+}
 
-      // Tier3 items
-      const l3 = li2.querySelectorAll(":scope > ul.oms-column-level-3 > li");
 
-      // Build table if we have tier3 or any anchors deeper
-      const table = document.createElement("table");
-      table.className = "oms-table";
-      let hasAnyRows = false;
+  function setColHidden(colEl, hidden){
+    if (!colEl) return;
+    const wrapper = colEl.closest(".oms-col");
+    if (!wrapper) return;
+    wrapper.classList.toggle("is-hidden", !!hidden);
+  }
 
-      if(l3.length){
-        // Tier3 exist -> headers + rows from tier4 anchors
-        l3.forEach(li3=>{
-          const tier3Label = textFromTier(li3);
-          const tier3Href = hrefFromTier(li3);
+  function initTable(browseEl){
+    const source = browseEl.querySelector('[data-oms="source"]');
+    const col1 = browseEl.querySelector('[data-oms="col1"]');
+    const col2 = browseEl.querySelector('[data-oms="col2"]');
+    const col3 = browseEl.querySelector('[data-oms="col3"]');
+    const col4 = browseEl.querySelector('[data-oms="col4"]'); // may be null on 3-col tables
 
-          // Tier3 is a header row; BUT if it is <a> in source, header should still be clickable
-          const headerText = tier3Href
-            ? `<a href="${tier3Href}" target="_self" rel="noopener" style="color:#fff;text-decoration:none;font-weight:900;">${tier3Label}</a>`
-            : tier3Label;
+    if (!source || !col1 || !col2 || !col3) return;
 
-          table.innerHTML += `<tr><th>${headerText}</th></tr>`;
+    const l1 = parseLevel1(source);
+    if (!l1.length) return;
 
-          // Tier4: list all anchors under level-4 (leaf links)
-          const l4Anchors = li3.querySelectorAll(":scope > ul.oms-column-level-4 a");
-          if(l4Anchors.length){
-            l4Anchors.forEach(a=>{
-              table.innerHTML += rowHTMLFromAnchor(a);
-              hasAnyRows = true;
-            });
-          } else {
-            // If no tier4 list exists, but tier3 itself is an <a>, don't add empty rows
-            // Otherwise show a subtle placeholder row
-            if(!tier3Href){
-              table.innerHTML += `<tr><td style="color:#475569;font-weight:800;">No links available.</td></tr>`;
-            }
-          }
-        });
-      } else {
-        // No tier3: show any anchors directly under tier2 (rare but supported)
-        const directAnchors = li2.querySelectorAll(":scope > a");
-        const deeperAnchors = li2.querySelectorAll(":scope ul a");
+    let selected1 = findActiveIndex(l1);
+    let selected2 = 0;
+    let selected3 = 0;
 
-        // Prefer deeper anchors if they exist
-        const anchorsToUse = deeperAnchors.length ? deeperAnchors : directAnchors;
-
-        if(anchorsToUse.length){
-          table.innerHTML += `<tr><th>Links</th></tr>`;
-          anchorsToUse.forEach(a=>{
-            table.innerHTML += rowHTMLFromAnchor(a);
-            hasAnyRows = true;
-          });
-        }
+    function renderCol4(){
+      if (!col4){
+        return; // this table doesn't have a 4th column
       }
 
-      if(hasAnyRows || table.querySelector("th")){
-        section.appendChild(table);
-      } else {
-        const empty = document.createElement("div");
-        empty.className = "oms-placeholder";
-        empty.textContent = "No links available in this section.";
-        section.appendChild(empty);
+      col4.innerHTML = "";
+
+      const l2 = l1[selected1].children || [];
+      const l3 = (l2[selected2] && l2[selected2].children) ? l2[selected2].children : [];
+      const l4 = (l3[selected3] && l3[selected3].children) ? l3[selected3].children : [];
+
+      if (!l4.length){
+        setColHidden(col4, true);
+        return;
       }
 
-      content.appendChild(section);
-    });
+      setColHidden(col4, false);
+
+      const active4 = findActiveIndex(l4);
+
+      l4.forEach((item, i) => {
+        const li = document.createElement("li");
+        const cell = makeCell(item, i === active4, null); // links
+        li.appendChild(cell);
+        col4.appendChild(li);
+      });
+    }
+
+    function renderCol3(){
+      col3.innerHTML = "";
+
+      const l2 = l1[selected1].children || [];
+      const l3 = (l2[selected2] && l2[selected2].children) ? l2[selected2].children : [];
+
+      if (!l3.length){
+        setColHidden(col3, true);
+        if (col4) setColHidden(col4, true);
+        return;
+      }
+
+      setColHidden(col3, false);
+
+      const active3 = findActiveIndex(l3);
+      selected3 = active3;
+
+      l3.forEach((item, i) => {
+        const li = document.createElement("li");
+
+        // If we have a 4th column, col3 should be clickable to populate col4
+        const cell = col4
+          ? makeCell(item, i === selected3, function(){
+              selected3 = i;
+              renderCol3();
+              renderCol4();
+            })
+          : makeCell(item, i === selected3, null); // no col4 => col3 is final (links)
+
+        li.appendChild(cell);
+        col3.appendChild(li);
+      });
+
+      renderCol4();
+    }
+
+  function renderCol2(){
+  col2.innerHTML = "";
+
+  const l2 = l1[selected1].children || [];
+
+  if (!l2.length){
+    setColHidden(col2, true);
+    setColHidden(col3, true);
+    if (col4) setColHidden(col4, true);
+    return;
   }
 
-  // Build left nav
-  l1Items.forEach((li1, idx)=>{
-    const label = textFromTier(li1);
-    const href = hrefFromTier(li1);
+  setColHidden(col2, false);
 
-    const navLi = document.createElement("li");
-    navLi.className = "oms-nav-item";
+  // ✅ Only pick active the FIRST time (or if out of range)
+  if (selected2 >= l2.length) selected2 = 0;
+  if (selected2 === 0){
+    const active2 = findActiveIndex(l2);
+    selected2 = active2;
+  }
 
-    // Button is used to load the right panel (even if tier1 is also a link)
-    navLi.innerHTML = `
-      <button type="button" class="oms-nav-btn" aria-label="Open ${label}">
-        <span>${label}</span>
-        <span style="opacity:.7;font-weight:900;">▸</span>
-      </button>
-      ${href ? `<div class="oms-nav-linkline"><a href="${href}" target="_self" rel="noopener"></a></div>` : ``}
-    `;
+  selected3 = 0;
 
-    const btn = navLi.querySelector(".oms-nav-btn");
-    btn.addEventListener("click", ()=>{
-      document.querySelectorAll(".oms-nav-item").forEach(x=>x.classList.remove("active"));
-      navLi.classList.add("active");
-      renderTier1(li1);
+  l2.forEach((item, i) => {
+    const li = document.createElement("li");
+    const cell = makeCell(item, i === selected2, function(){
+      selected2 = i;
+      selected3 = 0;
+      renderCol2();
+      renderCol3();
     });
-
-    nav.appendChild(navLi);
-
-    // Auto-open first item
-    if(idx === 0){
-      navLi.classList.add("active");
-      renderTier1(li1);
-    }
+    li.appendChild(cell);
+    col2.appendChild(li);
   });
+
+  renderCol3();
+}
+
+
+    function renderCol1(){
+      col1.innerHTML = "";
+      l1.forEach((item, i) => {
+        const li = document.createElement("li");
+        const cell = makeCell(item, i === selected1, function(){
+          selected1 = i;
+          selected2 = 0;
+          selected3 = 0;
+          renderCol1();
+          renderCol2();
+        });
+        li.appendChild(cell);
+        col1.appendChild(li);
+      });
+    }
+
+    renderCol1();
+    renderCol2();
+  }
+
+  document.querySelectorAll('[data-oms="browse"]').forEach(initTable);
 
 })();
 </script>
-
-</body>
-</html>
