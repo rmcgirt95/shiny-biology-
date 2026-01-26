@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Warranty</title>
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="style/detail.css">
+  <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.1/dist/browser-image-compression.js"></script>
+  <!-- In <head> -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+</head>
+<body>
+
+  <!-- Navigation -->
+<nav>
+  <button id="nav-toggle" aria-label="Toggle Navigation">☰</button>
+
+  <a href="index.html" class="back-button">Back to Job List</a>
+  <a href="backcharge.html" class="back-button">Back charge Form</a>
+<a id="calendarLink" href="https://calendar.vanirinstalledsales.info/personal-calendars.html" class="back-button" style="display: none;">
+  <span id="divisionNameSpan"></span>'s Warranty Calendar 
+</a>
+
+</nav>
+
+  <!-- Main Content -->
+  <div class="scrollable-content">
+    <div class="job-details-container">
+      <form id="job-form">
+
+        <!-- Basic Job Info -->
+        <label for="field-status">Status</label>
+        <input type="text" id="field-status" name="field-status" readonly>
+<br>
+
+        <input type="text" id="job-name" readonly>
+
+        <label>Field Technician:</label>
+        <input type="text" id="field-tech" readonly>
+
+        <label for="warranty-id">Warranty ID</label>
+        <input type="text" id="warranty-id" readonly>
+
+               <!-- Warranty Start Date (styled like other date fields) -->
+<div class="form-group">
+  <label for="date-warranty-started">Warranty Start Date</label>
+  <input type="date" id="date-warranty-started" name="date-warranty-started" readonly>
+</div>
+
+<div class="form-group">
+  <label for="StartDate">Scheduled Start</label>
+  <input type="datetime-local" id="StartDate" name="StartDate">
+</div>
+
+<div class="form-group">
+  <label for="EndDate">Scheduled End</label>
+  <input type="datetime-local" id="EndDate" name="EndDate">
+</div>
+
+        <!-- Address Field -->
+        <label>Address:</label>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <input type="text" id="address" readonly onclick="openMapApp()"
+            onmouseover="this.style.backgroundColor='#e0f2ff'; this.style.boxShadow='0px 4px 12px rgba(0, 123, 255, 0.3)'; this.style.transform='scale(1.02)';"
+            onmouseout="this.style.backgroundColor='#f8f9fa'; this.style.boxShadow='0px 4px 8px rgba(0, 0, 0, 0.1)'; this.style.transform='scale(1)';"
+            placeholder="Click for Directions">
+        </div>
+<br>
+        <!-- Original Subcontractor -->
+        <div id="original-sub-container">
+          <label>Original Subcontractor:</label>
+          <div id="original-subcontractor" class="clickable-call">N/A</div>
+        </div>
+<br>
+        <!-- Contact Info -->
+        <label>Homeowner Name:</label>
+        <input type="text" id="homeowner-name" readonly>
+<input type="text" id="homeowner-number" readonly onclick="handleHomeownerClick()">
+
+        <!-- Issue Description -->
+        <label>Description:</label>
+        <textarea id="description" data-field="Description of Issue" readonly></textarea>
+
+        <label>DOW to be Completed:</label>
+        <textarea id="dow-completed" data-field="DOW to be Completed" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false"></textarea>
+        <br>
+  <div class="sub-completed-container">
+          <label for="sub-not-needed">Sub not needed:</label>
+          <input type="checkbox" id="sub-not-needed" data-field="Subcontractor Not Needed">
+        </div>
+        <!-- Subcontractor Selection -->
+    <div class="subcontractor-select-wrapper">
+<label id="subcontractor-dropdown1-label" for="subcontractor-dropdown" style="font-weight:bold;">
+  Select a Subcontractor:
+</label>
+
+  <select id="subcontractor-dropdown" data-field="Subcontractor">
+    <option value="">Select a Subcontractor...</option>
+  </select>
+</div>
+
+      
+
+        <!-- Payment Info -->
+        <div id="subcontractor-payment-container">
+          <label for="subcontractor-payment">Subcontractor Payment</label>
+          <input type="text" id="subcontractor-payment" name="subcontractor-payment" placeholder="$0.00" data-field="Subcontractor Payment" inputmode="decimal">
+        </div>
+
+        <!-- Billable Section -->
+        <div id="additional-fields-container" style="padding: 16px;">
+          <div class="form-group">
+           <label for="billable-status" style="font-size: 18px; font-weight: 600;">Billable Status</label>
+<select id="billable-status" name="billable-status" data-field="Billable/ Non Billable" style="font-size: 16px; padding: 5px;">
+  <option value="">-- Select --</option>
+  <option value="Billable">Billable</option>
+  <option value="Non Billable">Non-Billable</option>
+</select>
+
+              </label>
+           
+          </div>
+
+          <div class="form-group" id="homeowner-builder-container" style="display: none;">
+            <label for="homeowner-builder">Homeowner/Builder Pay</label>
+            <select id="homeowner-builder" name="homeowner-builder" data-field="Homeowner Builder pay">
+              <option value="Homeowner">Homeowner</option>
+              <option value="Builder">Builder</option>
+              <option value=""></option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Billable Reason -->
+        <div class="form-group" id="billable-reason-container" style="display: none;">
+<label for="billable-reason" id="billable-reason-label">Billable Reason</label>
+          <select id="billable-reason" name="billable-reason" data-field="Billable Reason (If Billable)">
+            <option value="Another Trade Damaged Work">Another Trade Damaged Work</option>
+            <option value="Homeowner Damage">Homeowner Damage</option>
+            <option value="Framing Issue">Framing Issue</option>
+            <option value="Weather">Weather</option>
+            <option value="Builder after close repair">Builder after close repair</option>
+            <option value=""></option>
+          </select>
+        </div>
+
+        <!-- Hidden Field Review Flags -->
+        <div class="form-group" style="display: none;">
+          <label>Field Review Not Needed:</label>
+          <input type="checkbox" id="field-review-needed" data-field="Field Review Not Needed">
+        </div>
+
+        <div class="form-group" style="display: none;">
+          <label>Field Review Needed:</label>
+          <input type="checkbox" id="field-review-not-needed" data-field="Field Review Needed">
+        </div>
+
+        <!-- Materials Section -->
+<div id="material-needed-container" class="material-needed-container">
+  <label for="material-needed-select">Are any materials needed:</label>
+  <select id="material-needed-select">
+    <option value="">Select an option</option>
+    <option value="Needs Materials">Needs Materials</option>
+    <option value="Do Not Need Materials">Do Not Need Materials</option>
+  </select>
+  <br>
+  <div class="form-group" id="materials-needed-container">
+  
+      <label for="materials-needed" id="materials-needed-label">Materials Needed</label>
+    <textarea id="materials-needed" name="materials-needed" data-field="Materials Needed" autocomplete="off" autocorrect="on" autocapitalize="sentences" spellcheck="true"></textarea>
+  </div>
+</div>
+            <!-- Vendor Dropdown -->
+            <div id="vendor-dropdown-container">
+              <label for="vendor-dropdown">Select a Vendor:</label>
+              <select id="vendor-dropdown" data-field="Material Vendor">
+                <option value="">Select a Vendor...</option>
+              </select>
+            </div>
+          
+        <!-- Image Uploads -->
+        <div class="file-input-container">
+          <input type="file" id="upload-issue-picture" multiple accept="image/*" style="display: none;">
+          <button id="trigger-issue-upload" type="button">Upload Issue Image</button>
+          <div id="issue-file-list"></div>
+        </div>
+        <div id="issue-pictures" style="display: none;"></div>
+
+       
+        <div id="completed-pictures" class="file-preview" style="display: none;"></div>
+          <button id="delete-images-btn">Delete Selected Images</button>
+
+         <div id="file-input-container">
+          <input type="file" id="upload-completed-picture" multiple accept="image/*" style="display: none;">
+          <button id="trigger-completed-upload" type="button">Upload Completed Image</button>
+          <div id="file-list"></div>
+        </div>
+
+        <!-- Image Carousel Viewer -->
+        <div id="attachment-carousel" class="carousel-overlay" style="display: none;">
+          <div class="carousel-content">
+            <span id="close-carousel" class="carousel-close">&times;</span>
+            <div id="carousel-body"></div>
+            <div class="carousel-controls">
+              <span id="carousel-close-button">&times;</span>
+              <button id="carousel-prev" class="carousel-nav">&lt;</button>
+              <button id="carousel-next" class="carousel-nav">&gt;</button>
+              <button id="delete-current-attachment" type="button">Delete</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Miscellaneous Checkboxes -->
+       <div class="form-group centered-checkbox clickable-checkbox" id="field-tech-reviewed-container">
+  <label id="field-tech-reviewed-label" for="field-tech-reviewed">
+    <input type="checkbox" id="field-tech-reviewed" data-field="Field Tech Reviewed" />
+    Field Tech Reviewed
+  </label>
+</div>
+
+<div class="job-completed-container" id="job-completed-container">
+  <label for="job-completed-checkbox">Job Completed:</label>
+  <input type="checkbox" id="job-completed-checkbox" data-field="Job Completed">
+</div>
+      
+        <!-- Action Buttons -->
+        <button type="button" id="save-job">Save Changes</button>
+
+      </form>
+      
+      <!-- Upload Progress Bar -->
+        <div id="upload-progress-container">
+          <label id="upload-progress-label">Uploading...</label>
+          <div>
+            <div id="upload-progress-bar"></div>
+          </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- Environment Config -->
+  <script>
+    window.env = {
+      AIRTABLE_API_KEY: 'patM49mmBDFbP6y2n.545e1307aae93d7bd5fd579bc395039d43fece72fa6df5085bae343817d614ff',
+      AIRTABLE_BASE_ID: 'appO21PVRA4Qa087I',
+      AIRTABLE_TABLE_NAME: 'tbl6EeKPsNuEvt5yJ',
+      AIRTABLE_TABLE_NAME2: 'tbl9SgC5wUi2TQuF7',
+      AIRTABLE_SUBCONTRACTOR_TABLE_NAME: 'tbl9SgC5wUi2TQuF7'
+    };
+  </script>
+
+  <!-- JS Scripts -->
+  <script src="details.js"></script>
+  <!--  <script src="js/userfeedback.js"></script> -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const subNotNeededCheckbox = document.getElementById("sub-not-needed");
+  const subSelectWrapper     = document.querySelector(".subcontractor-select-wrapper");
+
+  function updateSubcontractorVisibility() {
+    const shouldHide = !!(subNotNeededCheckbox && subNotNeededCheckbox.checked);
+
+    if (subSelectWrapper) {
+      // Hide or show the entire wrapper so any enhanced UI (e.g., Choices.js) is hidden too
+      subSelectWrapper.style.display = shouldHide ? "none" : "";
+      subSelectWrapper.setAttribute("aria-hidden", shouldHide ? "true" : "false");
+    }
+  }
+
+  // Apply on page load
+  updateSubcontractorVisibility();
+
+  // React to user toggling the checkbox
+  if (subNotNeededCheckbox) {
+    subNotNeededCheckbox.addEventListener("change", updateSubcontractorVisibility);
+  }
+});
+</script>
+
+</body>
+</html>

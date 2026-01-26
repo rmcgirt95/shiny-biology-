@@ -20,7 +20,6 @@
   body{ margin:0; }
 
   .oms-series-wrap{
-    background: var(--page);
     padding: 24px 0 48px 0;
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     color: var(--ink);
@@ -32,17 +31,11 @@
     padding: 0 18px;
   }
 
-  .oms-hero{
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-    padding: 22px 24px;
-  }
+
 
   .oms-hero h1{
     margin: 0 0 10px 0;
-    font-size: 34px;
+    font-size: 40px;
     line-height: 1.15;
     font-weight: 900;
     color: var(--blue-800);
@@ -51,14 +44,14 @@
 
   .oms-hero h2{
     margin: 8px 0 6px 0;
-    font-size: 16px;
+    font-size: 25px;
     font-weight: 900;
   }
 
   .oms-hero p{
     margin: 0 0 12px 0;
     color: var(--muted);
-    font-size: 14px;
+    font-size: 19px;
     line-height: 1.5;
   }
 
@@ -68,7 +61,7 @@
     color: #fff;
     padding: 10px 14px;
     border-radius: 10px;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 800;
   }
   .oms-banner a{ color:#fff; text-decoration:underline; }
@@ -103,27 +96,9 @@
 .oms-open{ cursor: pointer; }
 
   /* ===== 3-column table like screenshot ===== */
-.oms-property-grid{
-  display:grid;
-  grid-template-columns: repeat(4, 1fr);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  overflow:hidden;
-  background:#fff;
-}
+
 
 .oms-col.is-hidden{ display:none; }
-
-@media (max-width: 900px){
-  .oms-property-grid{ grid-template-columns: 1fr; }
-}
-
-
-/* When columns hide, grid should shrink automatically */
-.oms-property-grid{
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-}
 
   .oms-col{
     border-right: 1px solid var(--line);
@@ -182,11 +157,11 @@
 /* Hover highlight like your screenshot */
 .oms-cell:hover{
   background: var(--green-500);
-  color: #fff;
+  color: black;
 }
 .oms-cell:hover .oms-open{
   opacity: 1;
-  color: #fff;
+  color: black;
 }
 
 /* Show only when hovering the cell */
@@ -219,18 +194,544 @@
   }
 
   .oms-col li:last-child .oms-cell{ border-bottom:none; }
+/* Center grid and cap total width */
+
+
+
+/* Table #2: hard cap to 2 visible columns */
+.oms-property-grid.oms-grid-2col .oms-col:nth-child(3){
+  display: none !important;
+}
+/* Improve overall readability in the table cards */
+.oms-card{
+  border-radius: 16px;
+}
+
+/* Head area: clearer hierarchy */
+.oms-card-head{
+  padding: 16px 18px;
+}
+.oms-card-head .title{
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+
+
+
+/* Cells: better spacing + type */
+.oms-cell{
+  font-size: 14px;          /* was 13px */
+  line-height: 1.25;
+  padding: 12px 14px;       /* more breathing room */
+  letter-spacing: .1px;
+}
+
+/* Better focus states for accessibility (keyboard users) */
+.oms-cell:focus-visible{
+  outline: 3px solid rgba(31,79,138,.35);
+  outline-offset: -3px;
+}
+
+/* Subtle row separators (cleaner than harsh borders) */
+.oms-cell{
+  border-bottom: 1px solid rgba(229,231,235,.9);
+}
+
+/* Make non-active rows easier to scan (gentle zebra) */
+.oms-col li:nth-child(even) .oms-cell:not(.is-active){
+  background: #f3fbf3; /* slightly different tint from --green-100 */
+}
+
+/* Active cell: slightly richer and more polished */
+.oms-cell.is-active{
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
+}
+
+/* Hover: keep your green but make it less “neon” */
+.oms-cell:hover{
+  filter: saturate(.95) brightness(.98);
+}
+
+/* Link pill: slightly bigger & clearer */
+.oms-open{
+  height: 24px;
+  padding: 0 9px;
+  font-size: 12px;
+}
+
+
+.oms-property-grid{
+  margin: 0 auto;
+  width: 100%;
+  max-width: 960px;
+
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(2,6,23,.06);
+}
+
+/* 4 columns: keep same feel as 3 columns */
+.oms-property-grid:has(.oms-col:nth-child(4):not(.is-hidden)){
+  width: 100%;
+  max-width: 960px; /* match your normal max width */
+  margin: 0 auto;
+}
+
+.oms-property-grid{
+  transition: width 260ms ease, max-width 260ms ease;
+  will-change: width, max-width;
+}
+
+/* Column hiding */
+.oms-col.is-hidden{
+  display: none;
+}
+
+/* Mobile: stack */
+@media (max-width: 900px){
+  .oms-property-grid{
+    width: 100%;
+    max-width: 100%;
+    grid-auto-flow: row;
+  }
+
+  .oms-col{
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .oms-col:last-child{
+    border-bottom: none;
+  }
+}
+
+
+@media (max-width: 1100px){
+  /* When space gets tight, hide 4th column only visually */
+  .oms-property-grid:not(.oms-grid-2col) .oms-col:nth-child(4){
+    display: none;
+  }
+}
+
 
   @media (max-width: 900px){
-    .oms-property-grid{ grid-template-columns: 1fr; }
-    .oms-col{ border-right:none; border-bottom:1px solid var(--line); }
-    .oms-col:last-child{ border-bottom:none; }
+
+
+  .oms-col{
+    border-right: none;
+    border-bottom: 1px solid var(--line);
   }
+
+  .oms-col:last-child{
+    border-bottom: none;
+  }
+}
+/* Smooth width changes when the number of columns changes */
+.oms-property-grid{
+  transition:
+    width 260ms ease,
+    max-width 260ms ease;
+  will-change: width, max-width;
+}
+/* Animate items inside a column when it becomes visible */
+.oms-col ul{
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+/* When a column is hidden, its content is invisible (not animated because display:none on wrapper) */
+.oms-col.is-hidden ul{
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+/* When visible, it settles in */
+.oms-col:not(.is-hidden) ul{
+  opacity: 1;
+  transform: translateY(0);
+}
+.oms-col{
+  transition: border-color 200ms ease;
+}
+/* =========================================
+   OMS GRID – UNIFIED WIDTH & SMOOTH TRANSITION
+========================================= */
+
+.oms-property-grid{
+  margin: 0 auto;
+
+  /* Unified width for 2–4 columns */
+  width: 100%;
+  max-width: 960px;
+
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(2,6,23,.06);
+
+  /* ✨ Smooth transitions */
+  transition:
+    max-width 280ms ease,
+    width 280ms ease;
+  will-change: max-width, width;
+}
+
+/* Slightly tighter feel when only 1–2 columns exist */
+.oms-property-grid:not(:has(.oms-col:nth-child(3):not(.is-hidden))){
+  max-width: 100%;
+}
+/* =========================================
+   LINKS ONLY: bold, underline, pointer
+========================================= */
+
+/* Any anchor inside an OMS cell */
+.oms-cell a{
+  font-weight: 900;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Keep link styling visible on hover */
+.oms-cell a:hover{
+  text-decoration-thickness: 2px;
+}
+
+/* Ensure non-link labels are NOT bolded */
+.oms-cell{
+  font-weight: 600; /* base weight for non-links */
+}
+
+/* Active cell still bold, but links stand out more */
+.oms-cell.is-active a{
+  font-weight: 950;
+  text-decoration-color: rgba(255,255,255,.9);
+}
+.resource-nav-wrap{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 18px 16px 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+/* Breadcrumb */
+.breadcrumb{
+  font-size: 13px;
+  color: #475569;
+  margin-bottom: 12px;
+}
+
+.breadcrumb a{
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.breadcrumb a:hover{
+  text-decoration: underline;
+}
+
+.breadcrumb span{
+  margin: 0 4px;
+}
+
+.breadcrumb .current{
+  color: #0f172a;
+  font-weight: 600;
+}
+
+/* Tabs */
+.resource-tabs{
+  display: flex;
+  gap: 28px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.resource-tabs .tab{
+  position: relative;
+  padding: 12px 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1f2937;
+  text-decoration: none;
+}
+
+.resource-tabs .tab:hover{
+  color: #15803d;
+}
+
+/* Active tab */
+.resource-tabs .tab.active{
+  color: #15803d;
+  font-weight: 600;
+}
+
+.resource-tabs .tab.active::after{
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  background: #22c55e;
+  border-radius: 2px 2px 0 0;
+}
+/* Page background + spacing like your screenshot */
+/* =========================================
+   MATCH SCREENSHOT #2: FLAT PAGE LAYOUT
+   (Paste at very bottom to override)
+========================================= */
+
+
+
+/* Remove the white card container around the hero */
+.oms-hero{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin-top: 18px !important;
+}
+
+/* Left-align the title like screenshot #2 */
+.oms-hero h1{
+  text-align: left !important;
+  font-size: 44px !important;
+  line-height: 1.12 !important;
+  font-weight: 950 !important;
+  margin: 10px 0 12px 0 !important;
+  letter-spacing: -0.4px !important;
+  color: var(--blue-800) !important;
+}
+
+/* Subtitle like screenshot #2 */
+.oms-hero h2{
+  font-size: 20px !important;
+  line-height: 1.3 !important;
+  font-weight: 900 !important;
+  margin: 0 0 8px 0 !important;
+  color: #0f172a !important;
+}
+
+/* Body copy: smaller, more readable */
+.oms-hero p{
+  font-size: 15px !important;
+  line-height: 1.65 !important;
+  color: var(--muted) !important;
+  max-width: 90ch !important;
+  margin: 0 0 14px 0 !important;
+}
+
+/* Remove the manual <br> gap under the H1 (you currently have <br>) */
+.oms-hero br{
+  display: none !important;
+}
+
+/* Slimmer, cleaner banner */
+.oms-banner{
+  background: #1f4f8a !important;
+  border-radius: 8px !important;
+  padding: 10px 14px !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+
+/* Link stands out */
+.oms-banner a{
+  font-weight: 900 !important;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+.resource-tabs{
+  margin-bottom: 18px;
+}
+/* ===============================
+   TABLE #2: Row-aligned column 2
+================================ */
+
+/* Column 2 becomes a flex column */
+.oms-grid-2col .oms-col:nth-child(2) ul{
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Each group aligns to its parent row */
+.oms-grid-2col .oms-col2-group{
+  flex: 1;                     /* match row height of column 1 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;     /* ⬅️ vertical centering */
+}
+/* =========================================
+   TABLE #2: TRUE ROW-ALIGNMENT BETWEEN COL1 + COL2
+   (paste at bottom)
+========================================= */
+
+/* Make both columns use the same "row slots" */
+.oms-grid-2col .oms-col:nth-child(1) ul,
+.oms-grid-2col .oms-col:nth-child(2) ul{
+  display: flex;
+  flex-direction: column;
+}
+
+/* Each parent row in col1 becomes a flex slot */
+.oms-grid-2col .oms-col:nth-child(1) ul > li{
+  flex: 1;
+  display: flex;
+}
+
+/* Ensure the button fills the row slot */
+.oms-grid-2col .oms-col:nth-child(1) ul > li > .oms-cell{
+  flex: 1;
+}
+
+/* Each group in col2 becomes the matching flex slot */
+.oms-grid-2col .oms-col2-group{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;  /* ✅ centers multiple items around the midpoint */
+}
+
+/* If you ever add multiple items inside a group later, spacing is nice */
+.oms-grid-2col .oms-col2-group > .oms-cell{
+  width: 100%;
+}
+/* =========================================
+   TABLE #2: JS-aligned col2 groups to col1 rows
+========================================= */
+
+/* We will absolutely position col2 groups */
+.oms-grid-2col .oms-col:nth-child(2) ul{
+  position: relative;
+}
+
+/* Each group will be placed at a computed top */
+.oms-grid-2col .oms-col2-group{
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+/* ==============================
+   TABLE #2 (only): col2 aligns to col1 rows
+   Works only when the grid has .oms-grid-2col
+============================== */
+
+/* the col2 UL becomes the positioning container */
+.oms-grid-2col .oms-col:nth-child(2) ul{
+  position: relative;
+  min-height: 1px;
+}
+
+/* each col2 "group" is placed next to its matching col1 row */
+.oms-grid-2col .oms-col2-group{
+  position: absolute;
+  left: 0;
+  right: 0;
+
+  /* if a col2 group has multiple items later, center them around the row midpoint */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  /* smooth motion */
+  transition: top .22s ease;
+}
+/* TABLE #2 only: absolute-position col2 groups */
+[data-oms-table="application"] .oms-col:nth-child(2) ul{
+  position: relative;
+  min-height: 1px;
+}
+
+[data-oms-table="application"] .oms-col2-group{
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: top .22s ease;
+}
+/* =========================================
+   TABLE #2: Show col2 only on parent hover
+========================================= */
+
+[data-oms-table="application"] .oms-col2-group{
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-2px);
+  transition: opacity .15s ease, transform .15s ease, top .22s ease;
+}
+
+[data-oms-table="application"] .oms-col2-group.is-visible{
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+/* TABLE #2 only: absolute-position col2 groups */
+[data-oms-table="application"] .oms-col:nth-child(2) ul{
+  position: relative;
+  min-height: 1px;
+}
+
+[data-oms-table="application"] .oms-col2-group{
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: top .22s ease;
+
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-2px);
+  transition: opacity .15s ease, transform .15s ease, top .22s ease;
+}
+
+[data-oms-table="application"] .oms-col2-group.is-visible{
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
 </style>
+<div class="resource-nav-wrap">
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a href="#">Home</a>
+    <span>/</span>
+    <a href="#">Resources</a>
+    <span>/</span>
+    <span class="current">Oligo Modification by Type</span>
+  </nav>
+
+  <!-- Tabs -->
+  <nav class="resource-tabs">
+    <a href="https://synoligo.com/resources/#resources" class="tab">Resources</a>
+    <a href="" class="tab">Oligo Modification Series</a>
+    <a href="https://synoligo.com/resources/#oligo-purity" class="tab active">Oligo Purity</a>
+    <a href="https://synoligo.com/resources/#brochures" class="tab">Brochures</a>
+    <a href="https://synoligo.com/resources/#posters" class="tab">Posters</a>
+  </nav>
+</div>
 
 <div class="oms-series-wrap">
   <div class="oms-series">
     <div class="oms-hero">
       <h1>Oligo Modification Series</h1>
+      <br>
 
       <h2>What are modified oligonucleotides?</h2>
       <p>
@@ -240,7 +741,7 @@
       </p>
 
       <div class="oms-banner">
-        READ OUR LATEST BLOG POST:
+        READ OUR LATEST BLOG POST: 
         <a href="https://synoligo.com/an-introduction-to-splice-switching-oligonucleotides/" target="_blank" rel="noopener">
           An Introduction to Splice-Switching Oligonucleotides
         </a>
@@ -249,20 +750,19 @@
       <!-- =========================
            TABLE UI #1: PROPERTY
       ========================== -->
-      <div class="oms-browse" data-oms="browse">
-        <div class="oms-card">
-          <div class="oms-card-head">
-            <div class="title">Oligo Modification by Property</div>
-          </div>
+<div class="oms-browse" data-oms="browse" style="margin-top:18px;">
+  <div class="oms-card">
+    <div class="oms-card-head">
+      <div class="title">Oligo Modification by Application</div>
+    </div>
 
-          <div style="padding:12px;">
-            <div class="oms-property-grid">
-  <div class="oms-col"><ul data-oms="col1"></ul></div>
-  <div class="oms-col"><ul data-oms="col2"></ul></div>
-  <div class="oms-col"><ul data-oms="col3"></ul></div>
-  <div class="oms-col"><ul data-oms="col4"></ul></div>
-</div>
-
+    <div style="padding:12px;">
+      <div class="oms-property-grid oms-grid-2col">
+        <div class="oms-col"><ul data-oms="col1"></ul></div>
+        <div class="oms-col"><ul data-oms="col2"></ul></div>
+        <div class="oms-col"><ul data-oms="col3"></ul></div>
+      </div>
+    </div>
           </div>
 
           <!-- SOURCE HTML (hidden) -->
@@ -299,17 +799,22 @@
                       </ul>
                     </li>
 
-                    <li class="">
-                      <a href="https://synoligo.com/nuclease-resistance-modifications/" target="_self">Backbone Modifications</a>
-                      <ul class="oms-column-level-3 d-lg-none">
-                        <li class="">
-                          <div>Phosphoramidate</div>
-                          <ul class="oms-column-level-4 d-lg-block">
-                            <li><a href="https://synoligo.com/mesyl-phosphoramidate-modification/" target="_self">Mesyl</a></li>
-                          </ul>
-                        </li>
-                      </ul>
-                    </li>
+     <li class="">
+  <a href="https://synoligo.com/nuclease-resistance-modifications/" target="_self">Backbone Modifications</a>
+
+  <ul class="oms-column-level-3 d-lg-none">
+    <li class="">
+      <a href="https://synoligo.com/nuclease-resistance-modifications/" target="_self">Phosphoramidate</a>
+
+      <ul class="oms-column-level-4 d-lg-block">
+        <li>
+          <a href="https://synoligo.com/mesyl-phosphoramidate-modification/" target="_self">Mesyl</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</li>
+
 
                     <li class=""><div>Stereochemistry</div>
                       <ul class="oms-column-level-3 d-lg-none">
@@ -350,20 +855,24 @@
       <!-- =========================
            TABLE UI #2: APPLICATION
       ========================== -->
-      <div class="oms-browse" data-oms="browse" style="margin-top:18px;">
+<div class="oms-browse" data-oms="browse" data-oms-table="application" style="margin-top:18px;">
         <div class="oms-card">
           <div class="oms-card-head">
             <div class="title">Oligo Modification by Application</div>
           </div>
 
           <div style="padding:12px;">
-            <div class="oms-property-grid">
-              <div class="oms-col"><ul data-oms="col1"></ul></div>
-              <div class="oms-col"><ul data-oms="col2"></ul></div>
-              <div class="oms-col"><ul data-oms="col3"></ul></div>
-            </div>
-          </div>
+           <div class="oms-grid-center">
+<div class="oms-property-grid oms-grid-2col">
+  <div class="oms-col"><ul data-oms="col1"></ul></div>
+  <div class="oms-col"><ul data-oms="col2"></ul></div>
+  <div class="oms-col"><ul data-oms="col3"></ul></div>
+</div>
 
+</div>
+
+          </div>
+          </div>
           <div data-oms="source" style="display:none;">
             <div class="oms-column-item">
               <ul class="oms-column-level-1">
@@ -509,19 +1018,35 @@ function makeCell(item, isActive, onActivate){
   btn.className = "oms-cell" + (isActive ? " is-active" : "");
   btn.appendChild(document.createTextNode(item.label));
 
-  const hasKids = itemHasChildren(item);
-  const hasLink = !!item.link;
+  const hasKids = Array.isArray(item.children) && item.children.length > 0;
+  const hasLink = !!(item.link && item.link.href);
 
-  // ✅ Parent behavior: hover + click activates table (NO navigation)
+  // ✅ Hover/focus expands (so the table still updates to show children)
   if (hasKids && typeof onActivate === "function"){
     btn.addEventListener("mouseenter", onActivate);
     btn.addEventListener("focus", onActivate);
-    btn.addEventListener("click", onActivate);
-    btn.classList.add("has-children");
-    btn.style.cursor = "pointer";
   }
 
-  // ✅ Add link icon if there is a link (icon navigates, not the cell)
+  // ✅ Click navigates if link exists (same-tab uses location.href)
+  btn.addEventListener("click", function(e){
+    // If the user clicked the ↗ icon, it stops propagation and we won't be here.
+    if (hasLink){
+      const target = item.link.target || "_self";
+      if (target === "_self"){
+        window.location.href = item.link.href;   // ✅ reliable in WP
+      } else {
+        window.open(item.link.href, target);     // ✅ _blank etc.
+      }
+      return;
+    }
+
+    // No link => just expand
+    if (hasKids && typeof onActivate === "function"){
+      onActivate();
+    }
+  });
+
+  // ✅ Link icon (shows on hover per your CSS). Clicking icon navigates only.
   if (hasLink){
     const a = document.createElement("a");
     a.className = "oms-open";
@@ -529,21 +1054,25 @@ function makeCell(item, isActive, onActivate){
     a.target = item.link.target || "_self";
     a.rel = "noopener";
     a.textContent = "↗";
-    a.addEventListener("click", function(e){
-      e.stopPropagation(); // don’t trigger expand
+    a.addEventListener("click", function(ev){
+      ev.stopPropagation(); // don't expand
+      // NOTE: let the browser handle navigation naturally for anchors
     });
     btn.appendChild(a);
   }
 
-  // ✅ Leaf with no kids: if no link, still show but disable
+  // ✅ If leaf with no link: show but disable
   if (!hasKids && !hasLink){
     btn.classList.add("is-muted");
     btn.disabled = true;
     btn.style.cursor = "default";
+  } else {
+    btn.style.cursor = "pointer";
   }
 
   return btn;
 }
+
 
 
   function setColHidden(colEl, hidden){
@@ -568,6 +1097,77 @@ function makeCell(item, isActive, onActivate){
     let selected1 = findActiveIndex(l1);
     let selected2 = 0;
     let selected3 = 0;
+// put this INSIDE initTable(browseEl), near your other helper functions
+let table2ResizeBound = false;
+let hoveredParentIndex = null;
+let hoveringCol2 = false;
+
+function setVisibleGroup(index){
+  hoveredParentIndex = index;
+
+  const col2UL = browseEl.querySelector('[data-oms="col2"]');
+  if (!col2UL) return;
+
+  const groups = Array.from(col2UL.querySelectorAll(":scope > li.oms-col2-group"));
+  groups.forEach((g, i) => {
+    if (i === index) g.classList.add("is-visible");
+    else g.classList.remove("is-visible");
+  });
+
+  requestAnimationFrame(alignTable2Col2Groups);
+}
+
+function hideAllGroups(){
+  hoveredParentIndex = null;
+
+  const col2UL = browseEl.querySelector('[data-oms="col2"]');
+  if (!col2UL) return;
+
+  const groups = Array.from(col2UL.querySelectorAll(":scope > li.oms-col2-group"));
+  groups.forEach(g => g.classList.remove("is-visible"));
+}
+
+function alignTable2Col2Groups(){
+  if (browseEl.getAttribute("data-oms-table") !== "application") return;
+
+  const col1UL = browseEl.querySelector('[data-oms="col1"]');
+  const col2UL = browseEl.querySelector('[data-oms="col2"]');
+  if (!col1UL || !col2UL) return;
+
+  const col1Lis = Array.from(col1UL.children).filter(x => x.tagName === "LI");
+  const col2Groups = Array.from(col2UL.children).filter(x => x.classList && x.classList.contains("oms-col2-group"));
+  if (!col1Lis.length || col1Lis.length !== col2Groups.length) return;
+
+  const col2Rect = col2UL.getBoundingClientRect();
+
+  col2Groups.forEach((group, i) => {
+    const r1 = col1Lis[i].getBoundingClientRect();
+    const targetCenterY = (r1.top + r1.height / 2) - col2Rect.top;
+
+    const gh = group.getBoundingClientRect().height || group.offsetHeight || 0;
+    const top = Math.max(0, targetCenterY - gh / 2);
+
+    group.style.top = top + "px";
+  });
+
+  const last = col2Groups[col2Groups.length - 1];
+  if (last){
+    const bottom = (parseFloat(last.style.top || "0") + (last.offsetHeight || 0)) + 8;
+    col2UL.style.minHeight = bottom + "px";
+  }
+  // Prevent flicker when moving from col1 -> col2 (Table #2 only)
+if (browseEl.getAttribute("data-oms-table") === "application"){
+  col2.addEventListener("mouseenter", () => { hoveringCol2 = true; });
+  col2.addEventListener("mouseleave", () => {
+    hoveringCol2 = false;
+    if (hoveredParentIndex === null) hideAllGroups();
+  });
+}
+
+}
+
+
+
 
     function renderCol4(){
       if (!col4){
@@ -636,6 +1236,64 @@ function makeCell(item, isActive, onActivate){
   function renderCol2(){
   col2.innerHTML = "";
 
+  const isApplicationTable = browseEl.getAttribute("data-oms-table") === "application";
+
+  // ===== TABLE #2 (Application): one col2 group per col1 parent =====
+  if (isApplicationTable){
+    // Build one "row slot" in col2 for EACH parent in col1
+    l1.forEach((parentItem, parentIndex) => {
+      const group = document.createElement("li");
+      group.className = "oms-col2-group";
+
+      const kids = parentItem.children || [];
+
+      // If no kids, render a muted placeholder so row still exists
+      if (!kids.length){
+        const placeholder = document.createElement("button");
+        placeholder.type = "button";
+        placeholder.className = "oms-cell is-muted";
+        placeholder.textContent = "—";
+        placeholder.disabled = true;
+        placeholder.style.cursor = "default";
+        group.appendChild(placeholder);
+        col2.appendChild(group);
+        return;
+      }
+
+      // If there are multiple kids, stack them in the same group
+      kids.forEach((kid, kidIndex) => {
+        const cell = makeCell(
+          kid,
+          parentIndex === selected1 && kidIndex === selected2,
+          function(){
+            // When hovering/clicking a child, sync the left side selection
+            selected1 = parentIndex;
+            selected2 = kidIndex;
+            selected3 = 0;
+            renderCol1();
+            renderCol2();
+            renderCol3();
+          }
+        );
+
+        // Add a little spacing between multiple children
+        cell.style.marginTop = kidIndex === 0 ? "0" : "6px";
+
+        group.appendChild(cell);
+      });
+
+      col2.appendChild(group);
+    });
+
+    // In Table #2, col3 should reflect the currently selected parent/child
+    renderCol3();
+hideAllGroups();
+
+    // Now alignment counts match: col1Lis === col2Groups
+    return;
+  }
+
+  // ===== TABLE #1 (Property): keep your original behavior =====
   const l2 = l1[selected1].children || [];
 
   if (!l2.length){
@@ -647,7 +1305,6 @@ function makeCell(item, isActive, onActivate){
 
   setColHidden(col2, false);
 
-  // ✅ Only pick active the FIRST time (or if out of range)
   if (selected2 >= l2.length) selected2 = 0;
   if (selected2 === 0){
     const active2 = findActiveIndex(l2);
@@ -672,27 +1329,66 @@ function makeCell(item, isActive, onActivate){
 }
 
 
-    function renderCol1(){
-      col1.innerHTML = "";
-      l1.forEach((item, i) => {
-        const li = document.createElement("li");
-        const cell = makeCell(item, i === selected1, function(){
-          selected1 = i;
-          selected2 = 0;
-          selected3 = 0;
-          renderCol1();
-          renderCol2();
-        });
-        li.appendChild(cell);
-        col1.appendChild(li);
+function renderCol1(){
+  col1.innerHTML = "";
+
+  const isApplicationTable = browseEl.getAttribute("data-oms-table") === "application";
+
+  l1.forEach((item, i) => {
+    const li = document.createElement("li");
+
+    const cell = makeCell(item, i === selected1, function(){
+      selected1 = i;
+      selected2 = 0;
+      selected3 = 0;
+      renderCol1();
+      renderCol2();
+    });
+
+    // ✅ Table #2: show col2 row only when parent is hovered
+    if (isApplicationTable){
+      cell.addEventListener("mouseenter", () => {
+        setVisibleGroup(i);
+        requestAnimationFrame(alignTable2Col2Groups);
+      });
+
+      cell.addEventListener("mouseleave", () => {
+        hoveredParentIndex = null;
+        setTimeout(() => {
+          if (!hoveringCol2) hideAllGroups();
+        }, 60);
       });
     }
 
-    renderCol1();
-    renderCol2();
-  }
+    li.appendChild(cell);
+    col1.appendChild(li);
+  });
+}
 
-  document.querySelectorAll('[data-oms="browse"]').forEach(initTable);
+/* ✅ IMPORTANT: initial render happens INSIDE initTable */
+renderCol1();
+renderCol2();
 
-})();
+/* ✅ OPTIONAL: align after first render for table 2 */
+requestAnimationFrame(alignTable2Col2Groups);
+
+/* ✅ Bind resize ONCE per table (safe) */
+if (!table2ResizeBound && browseEl.getAttribute("data-oms-table") === "application"){
+  table2ResizeBound = true;
+
+  col2.addEventListener("mouseenter", () => { hoveringCol2 = true; });
+  col2.addEventListener("mouseleave", () => {
+    hoveringCol2 = false;
+    if (hoveredParentIndex === null) hideAllGroups();
+  });
+
+  window.addEventListener("resize", () => requestAnimationFrame(alignTable2Col2Groups));
+}
+
+} // ✅ THIS closes initTable(browseEl) — you were missing this
+
+document.querySelectorAll('[data-oms="browse"]').forEach(initTable);
+
+})();  // ✅ closes the IIFE
+
 </script>

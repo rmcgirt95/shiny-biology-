@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TEW Layout (Synoligo Demo)</title>
+
+  <style>
+    :root{
+      --green:#4fb247;
+      --green-dark:#2f7f2a;
+      --link-green:#1b7a13;
+      --lite:#f5f7f5;
+      --line:#d8d8d8;
+      --row:#efefef;
+      --row2:#f7f7f7;
+      --tab:#e9e9e9;
+      --tab-active:#eaf6e8;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      color:#000;
+      background:#fff;
+    }
+
+    /* Frame width like screenshot */
+    .page{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 10px 12px 24px;
+    }
+
+    /* Top bar: tabs left, icons right */
+    .topbar{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+
+    .top-tabs{
+      display:flex;
+      gap: 6px;
+      align-items:flex-end;
+    }
+    .top-tabs button{
+      border:0;
+      padding: 8px 12px;
+      background: var(--tab);
+      cursor:pointer;
+      font-size: 14px;
+    }
+    .top-tabs button.active{
+      background: var(--tab-active);
+      border-left: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid #fff;
+      font-weight: bold;
+    }
+
+    .actions{
+      display:flex;
+      gap: 18px;
+      align-items:center;
+      padding-bottom: 6px;
+      flex-wrap: wrap;
+    }
+    .action{
+      display:flex;
+      align-items:center;
+      gap: 6px;
+      color: var(--link-green);
+      text-decoration:none;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    .icon{
+      width: 22px;
+      height: 22px;
+      display:inline-grid;
+      place-items:center;
+      border: 1px solid var(--line);
+      background:#fff;
+      border-radius: 3px;
+      font-size: 12px;
+      color:#444;
+    }
+
+    /* Two-column layout */
+    .layout{
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap: 14px;
+      align-items:start;
+    }
+
+    /* Left panel */
+    .left{
+      background: var(--lite);
+      border-right: 1px solid var(--line);
+      padding: 10px 10px 14px;
+      min-height: 520px;
+    }
+    .left .prompt{
+      color:#c20000;
+      font-weight:bold;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+    .left .controls{
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .left .controls a{
+      color:#000;
+      text-decoration:none;
+    }
+    .left .controls a:hover{
+      text-decoration:underline;
+    }
+
+    .subjects{
+      list-style:none;
+      padding:0;
+      margin:0;
+    }
+    .subjects li{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      padding: 7px 4px;
+      cursor:pointer;
+      font-size: 13px;
+      border: 1px solid transparent;
+    }
+    .subjects li:hover{
+      background:#fff;
+      border-color: #e6e6e6;
+    }
+    .subjects li.active{
+      background:#fff;
+      border-color: #cfcfcf;
+      font-weight:bold;
+    }
+    .bullet{
+      width: 6px;
+      height: 6px;
+      background:#000;
+      display:inline-block;
+    }
+
+    /* Right results panel */
+    .right{
+      border: 1px solid var(--line);
+      background:#fff;
+    }
+
+    .right-header{
+      background: var(--green);
+      color:#fff;
+      font-weight:bold;
+      padding: 6px 10px;
+      font-size: 14px;
+    }
+
+    .results{
+      list-style:none;
+      padding:0;
+      margin:0;
+    }
+
+    .results li{
+      display:grid;
+      grid-template-columns: 18px 1fr 110px;
+      gap: 8px;
+      align-items:center;
+      padding: 7px 10px;
+      border-bottom: 2px solid #fff; /* mimic thick white separators */
+      background: var(--row);
+      font-size: 13px;
+    }
+    .results li:nth-child(even){
+      background: var(--row2);
+    }
+
+    .dot{
+      width: 6px;
+      height: 6px;
+      background: var(--green-dark);
+      border-radius: 50%;
+      display:inline-block;
+      margin-top: 2px;
+    }
+
+    .result-link{
+      color: var(--link-green);
+      text-decoration: none;
+    }
+    .result-link:hover{
+      text-decoration: underline;
+    }
+
+    .date{
+      text-align:right;
+      color:#000;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    /* Pagination bar */
+    .pager{
+      background: var(--green);
+      padding: 8px 10px;
+      display:flex;
+      gap: 4px;
+    }
+    .pager a{
+      display:inline-block;
+      padding: 4px 8px;
+      background:#fff;
+      border:1px solid #000;
+      color:#000;
+      text-decoration:none;
+      font-size: 12px;
+    }
+    .pager a.active{
+      background:#000;
+      color:#fff;
+    }
+  /* ====== Wrapper background + spacing (matches screenshot) ====== */
+  .oligo-tabs-wrap{
+    background:#f5f8fb;                 /* very light blue/gray */
+    border-bottom:1px solid #d8e1ea;    /* thin bottom rule */
+    padding: 10px 0 0;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  /* Centered content like a theme container */
+  .oligo-tabs-inner{
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 18px;
+  }
+
+  /* ====== Breadcrumbs (small + centered, last crumb green) ====== */
+  .oligo-breadcrumbs{
+    text-align:center;
+    font-size: 11px;
+    line-height: 1.2;
+    margin: 0 0 10px;
+    color:#1a1a1a;
+    white-space: nowrap;
+  }
+
+  .oligo-breadcrumbs .crumb{
+    color:#1a1a1a;
+    text-decoration:none;
+  }
+
+  .oligo-breadcrumbs .crumb:hover{
+    text-decoration: underline;
+  }
+
+  .oligo-breadcrumbs .sep{
+    margin: 0 6px;
+    color:#1a1a1a;
+  }
+
+  .oligo-breadcrumbs .crumb.current{
+    color:#2f8a2f;     /* green like screenshot */
+    font-weight: 400;
+  }
+
+  /* ====== Tabs row ====== */
+  .oligo-tabs{
+    display:flex;
+    justify-content:center;
+    align-items:flex-end;
+    gap: 78px;                          /* wide spacing between tabs */
+    padding: 6px 0 0;
+  }
+
+  .oligo-tabs .tab{
+    position:relative;
+    display:inline-block;
+    padding: 10px 0 12px;
+    font-size: 16px;
+    line-height: 1;
+    color:#2e5998;                      /* blue text */
+    text-decoration:none;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .oligo-tabs .tab:hover{
+    text-decoration: underline;
+  }
+
+  /* Active tab: bold + green underline */
+  .oligo-tabs .tab.is-active{
+    font-weight: 700;
+    color:#1f3f73;                      /* slightly deeper blue */
+  }
+
+  .oligo-tabs .tab.is-active::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:-1px;                        /* sits on the bottom border line */
+    height:2px;
+    background:#56a535;                 /* green underline */
+  }
+
+  /* ====== Optional: make it behave nicely on smaller screens ====== */
+  @media (max-width: 900px){
+    .oligo-tabs{
+      gap: 28px;
+      flex-wrap: wrap;
+      padding-bottom: 10px;
+    }
+    .oligo-breadcrumbs{
+      white-space: normal;
+    }
+  }
+    /* Responsive */
+    @media (max-width: 900px){
+      .layout{ grid-template-columns: 1fr; }
+      .left{ border-right:0; border: 1px solid var(--line); }
+    }
+  </style>
+</head>
+
+<body>
+    <div class="oligo-tabs-wrap">
+  <div class="oligo-tabs-inner">
+
+    <!-- Breadcrumbs -->
+    <nav class="oligo-breadcrumbs" aria-label="Breadcrumb">
+      <a class="crumb" href="#">Home</a>
+      <span class="sep">/</span>
+      <a class="crumb" href="#">Resources</a>
+      <span class="sep">/</span>
+      <span class="crumb current">Oligo Modification by Type</span>
+    </nav>
+
+    <!-- Tabs -->
+    <div class="oligo-tabs" role="tablist" aria-label="Resource Sections">
+      <a class="tab" href="https://synoligo.com/resources/#resources" role="tab" aria-selected="false">Resources</a>
+      <a class="tab is-active" href="https://synoligo.com/resources/#oligoModificationSeries" role="tab" aria-selected="true">Oligo Modification Series</a>
+      <a class="tab" href="https://synoligo.com/resources/#oligo-purity" role="tab" aria-selected="false">Oligo Purity</a>
+      <a class="tab" href="https://synoligo.com/resources/#brochures" role="tab" aria-selected="false">Brochures</a>
+      <a class="tab" href="https://synoligo.com/resources/#posters" role="tab" aria-selected="false">Posters</a>
+    </div>
+
+  </div>
+</div>
+  <div class="page">
+
+    <!-- Top row -->
+    <div class="tabs">
+  <button id="browseTab" class="tab active">Browse Articles</button>
+  <button id="searchTab" class="tab">Search Articles</button>
+</div>
+
+
+      <div class="actions">
+        <a class="action" href="#"><span class="icon">☎</span>Contact Us</a>
+        <a class="action" href="#"><span class="icon">✉</span>Email</a>
+        <a class="action" href="#"><span class="icon">⌂</span>Website</a>
+        <a class="action" href="javascript:window.print()"><span class="icon">⎙</span>Print</a>
+      </div>
+    </div>
+
+    <!-- Main layout -->
+     <div id="browsePanel">
+
+    <div class="layout">
+
+      <!-- LEFT: subjects -->
+      <aside class="left">
+        <div class="prompt">Please select subject area:</div>
+        <div class="controls">
+          <a href="#" id="collapseAll">Collapse All</a> | <a href="#" id="expandAll">Expand All</a>
+        </div>
+
+        <ul class="subjects" id="subjectsList">
+          <!-- generated -->
+        </ul>
+      </aside>
+
+      <!-- RIGHT: results -->
+      <section class="right">
+        <div class="right-header" id="resultsHeader">Select a subject</div>
+
+        <ul class="results" id="resultsList">
+          <!-- generated -->
+        </ul>
+
+     <div class="pager" id="pager" style="display:none;">
+          <a href="#" class="active">1</a>
+          <a href="#">2</a>
+          <a href="#">3</a>
+          <a href="#">4</a>
+        </div>
+      </section>
+</div>
+    </div>
+
+    <!-- =========================
+         SOURCE DATA (HIDDEN)
+         Hardcoded in THIS file
+    ========================== -->
+   <div data-oms="source" style="display:none;">
+  <div class="oms-column-item">
+    <ul class="oms-column-level-1">
+
+      <li>
+        <div>Duplex Stability</div>
+        <ul class="oms-column-level-2">
+          <li>
+            <div>Increasing Melting Temperatures</div>
+            <ul class="oms-column-level-3">
+              <li>
+                <div>2’-Sugar Modifications</div>
+                <ul class="oms-column-level-4">
+                  <li>
+                    <a href="https://synoligo.com/threose-nucleic-acid-modification/" target="_self">
+                      Threose Nucleic Acid
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <div>Nuclease Resistance</div>
+        <ul class="oms-column-level-2">
+          <li>
+            <div>Increasing Melting Temperatures</div>
+            <ul class="oms-column-level-3">
+              <li>
+                <div>2’-Sugar Modifications</div>
+                <ul class="oms-column-level-4">
+                  <li>
+                    <a href="https://synoligo.com/nuclease-resistance-modifications/" target="_self">
+                      Nuclease Resistance Modifications
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://synoligo.com/threose-nucleic-acid-modification/" target="_self">
+                      Threose Nucleic Acid Modification
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://synoligo.com/mesyl-phosphoramidate-modification/" target="_self">
+                      Mesyl Phosphoramidate Modification
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://synoligo.com/stereopure-oligonucleotides-with-different-backbone-chemistries/" target="_self">
+                      Stereopure Oligonucleotides with Different Backbone Chemistries
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://synoligo.com/5-triphosphate-oligonucleotides/" target="_self">
+                      5′ Triphosphate Oligonucleotides
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <div>Cell Permeability</div>
+        <ul class="oms-column-level-2">
+          <li>
+            <a href="https://synoligo.com/" target="_self">Placeholder Article</a>
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        <div>Stable Isotopic Labeling</div>
+        <ul class="oms-column-level-2">
+          <li>
+            <a href="https://synoligo.com/stable-isotope-labeling-34s/" target="_self">
+              Stable Isotope Labeling with 34S
+            </a>
+          </li>
+          <li>
+            <a href="https://synoligo.com/stable-isotope-labeling-18o/" target="_self">
+              Stable Isotope Labeling with 18O
+            </a>
+          </li>
+        </ul>
+      </li>
+
+      <!-- ✅ NEW LEFT ENTRY -->
+      <li>
+        <div>Genome Editing</div>
+        <ul class="oms-column-level-2">
+          <li>
+            <a href="https://synoligo.com/ultra-long-oligos/" target="_self">Ultra-Long Oligos</a>
+          </li>
+         </ul>
+         </li>
+           <li>
+        <div>mRNA Editing</div>
+        <ul class="oms-column-level-2">
+          <li>
+            <a href="https://synoligo.com/isouridine-n3u-in-adar-editing/" target="_self">ADAR Editing</a>
+          </li>
+           <li>
+            <a href="https://synoligo.com/antisense-oligos-morpholinos-in-duchenne-muscular-dystrophy/" target="_self">Splice-switching ising PMOs</a>
+          </li>
+         </ul>
+         </li>
+         <li>
+        <div>Spatial Transcriptomics</div>
+        <ul class="oms-column-level-2">
+          <li>
+            <a href="https://synoligo.com/merfish-probes-for-spatial-transcriptomics/" target="_self">MERFISH Probes</a>
+          </li>
+          </ul>
+         </li>
+         <li>
+ <div>Time-Gated Detection</div>
+        <ul class="oms-column-level-2">
+          <li>
+            <a href="https://synoligo.com/lanthanide-probe-for-time-resolved-photoluminescence/" target="_self">Lumi804-Eu: An Exceptional Lanthanide probe for Time-Resolved Photoluminescence</a>
+          </li>
+          
+         </ul>
+         </li>
+                  <li>
+ <div>RNA Splicing/Switching</div>
+        <ul class="oms-column-level-2">
+          <li>
+            <a href="https://synoligo.com/lanthanide-probe-for-time-resolved-photoluminescence/" target="_self">Splice-Switching Oligonucleotides</a>
+          </li>
+          
+         </ul>
+         </li>
+                         <li>
+ <div>Oligonucleotide Conjugation</div>
+        <ul class="oms-column-level-2">
+          <li>
+            <a href="https://synoligo.com/choosing-linkers-for-antibody-oligonucleotide-conjugates/" target="_self">Choosing Linkers (AOCs vs ADCs)</a>
+          </li>
+          
+         </ul>
+         </li>
+
+    </ul>
+  </div>
+  </div>
+  <div id="searchPanel" style="display:none;">
+
+  <div class="header">Find papers that have..</div>
+
+  <div class="panel">
+    <div class="row">
+      <label>all these words:</label>
+<input type="text" id="searchAllWords">
+    </div>
+
+    <div class="row">OR</div>
+
+    <div class="row">
+      <label>this exact wording or phrase:</label>
+<input type="text" id="searchExact">
+    </div>
+
+    <div class="row">
+      <label>Search:</label>
+      <input type="radio" checked> Full Text
+      <input type="radio"> Article Title Only
+    </div>
+
+    <div class="row">
+      <label>Maximum Age:</label>
+      <select>
+        <option>Any Age</option>
+      </select>
+    </div>
+
+    <div class="row">
+<button type="button" id="searchSubmitBtn">Search</button>
+    </div>
+     <div class="right-header">Your Search Results...</div>
+  <ul class="results" id="searchResults"></ul>
+  </div>
+</div>
+
+</div>
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  /* ===============================
+     TAB TOGGLING
+  =============================== */
+
+  const browseTab   = document.getElementById("browseTab");
+  const searchTab   = document.getElementById("searchTab");
+  const browsePanel = document.getElementById("browsePanel");
+  const searchPanel = document.getElementById("searchPanel");
+
+  if (browseTab && searchTab) {
+    searchTab.addEventListener("click", function (e) {
+      e.preventDefault();
+      browsePanel.style.display = "none";
+      searchPanel.style.display = "block";
+      searchTab.classList.add("active");
+      browseTab.classList.remove("active");
+    });
+
+    browseTab.addEventListener("click", function (e) {
+      e.preventDefault();
+      searchPanel.style.display = "none";
+      browsePanel.style.display = "block";
+      browseTab.classList.add("active");
+      searchTab.classList.remove("active");
+    });
+  }
+
+  /* ===============================
+     OMS SOURCE PARSING
+  =============================== */
+
+  const sourceEl = document.querySelector('[data-oms="source"]');
+  if (!sourceEl) return;
+
+  function cleanText(s) {
+    return (s || "").replace(/\s+/g, " ").trim();
+  }
+
+  function parseNode(li) {
+    const node = {
+      title: "",
+      href: null,
+      target: "_self",
+      children: []
+    };
+
+    const titleDiv = li.querySelector(":scope > div");
+    if (titleDiv) node.title = cleanText(titleDiv.textContent);
+
+    const a = li.querySelector(":scope > a");
+    if (a) {
+      node.title = cleanText(a.textContent);
+      node.href = a.getAttribute("href");
+      node.target = a.getAttribute("target") || "_self";
+    }
+
+    const ul = li.querySelector(":scope > ul");
+    if (ul) {
+      ul.querySelectorAll(":scope > li").forEach(child => {
+        node.children.push(parseNode(child));
+      });
+    }
+
+    return node;
+  }
+
+  function parseSubjectsFromSource(root) {
+    const subjects = [];
+
+    root.querySelectorAll(".oms-column-level-1 > li").forEach(li => {
+      const titleDiv = li.querySelector(":scope > div");
+      const childUl  = li.querySelector(":scope > ul");
+
+      if (!titleDiv || !childUl) return;
+
+      subjects.push({
+        title: cleanText(titleDiv.textContent),
+        children: Array.from(childUl.children).map(parseNode)
+      });
+    });
+
+    return subjects;
+  }
+
+  function collectLeafLinks(node) {
+    let out = [];
+
+    if (node.href) {
+      out.push({
+        title: node.title,
+        href: node.href,
+        target: node.target
+      });
+    }
+
+    node.children.forEach(child => {
+      out = out.concat(collectLeafLinks(child));
+    });
+
+    return out;
+  }
+function renderBrowse(subjects) {
+  const rightPanel = document.querySelector("#browsePanel .right");
+  if (!rightPanel) return;
+
+  rightPanel.innerHTML = "";
+
+  subjects.forEach(subject => {
+    const h3 = document.createElement("h3");
+    h3.textContent = subject.title;
+    rightPanel.appendChild(h3);
+
+    const ul = document.createElement("ul");
+
+    subject.children.forEach(child => {
+      collectLeafLinks(child).forEach(item => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <a href="${item.href}" target="${item.target}">
+            ${item.title}
+          </a>
+        `;
+        ul.appendChild(li);
+      });
+    });
+
+    rightPanel.appendChild(ul);
+  });
+}
+  const subjects = parseSubjectsFromSource(sourceEl);
+// 🔁 RESTORE BROWSE RENDERING
+renderBrowse(subjects);
+
+  /* ===============================
+     SEARCH (USES SAME DATA AS BROWSE)
+  =============================== */
+
+  const searchBtn   = document.getElementById("searchSubmitBtn");
+  const resultsUL  = document.getElementById("searchResults");
+
+  if (!searchBtn || !resultsUL) return;
+
+  searchBtn.addEventListener("click", function () {
+
+    const q1 = document.getElementById("searchAllWords").value.toLowerCase();
+    const q2 = document.getElementById("searchExact").value.toLowerCase();
+    const query = q2 || q1;
+
+    resultsUL.innerHTML = "";
+
+    if (!query) {
+      resultsUL.innerHTML = "<li>Please enter a search term</li>";
+      return;
+    }
+
+    let allLinks = [];
+    subjects.forEach(subject => {
+      subject.children.forEach(child => {
+        allLinks = allLinks.concat(collectLeafLinks(child));
+      });
+    });
+
+    const matches = allLinks.filter(item =>
+      item.title.toLowerCase().includes(query)
+    );
+
+    if (!matches.length) {
+      resultsUL.innerHTML = "<li>No results found</li>";
+      return;
+    }
+
+    matches.forEach(item => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <span class="dot"></span>
+        <a href="${item.href}" target="${item.target}">
+          ${item.title}
+        </a>
+      `;
+      resultsUL.appendChild(li);
+    });
+
+  });
+
+});
+
+
+</script>
+
+</body>
+</html>
