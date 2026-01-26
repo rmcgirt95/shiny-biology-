@@ -318,6 +318,87 @@
     background:#56a535;                 /* green underline */
   }
 
+  /* Cleaner subject list (accordion) */
+.subjects{
+  list-style:none;
+  padding:0;
+  margin:0;
+}
+
+.subject-item{
+  border: 1px solid transparent;
+  border-radius: 6px;
+  margin: 6px 0;
+  background: transparent;
+}
+
+.subject-btn{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  padding: 10px 10px;
+  background:#fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 6px;
+  cursor:pointer;
+  text-align:left;
+  font-size: 13px;
+}
+
+.subject-item.active .subject-btn{
+  border-color:#cfcfcf;
+  font-weight:700;
+}
+
+.subject-btn .chev{
+  width: 14px;
+  display:inline-block;
+  transform: rotate(0deg);
+  transition: transform .15s ease;
+}
+
+.subject-item.active .subject-btn .chev{
+  transform: rotate(90deg);
+}
+
+.subject-title{
+  font-weight:700; /* bolded text under “Please select subject area” */
+}
+
+.subject-children{
+  margin: 6px 4px 10px 24px;
+  padding-left: 10px;
+  border-left: 2px solid #e6e6e6;
+}
+
+.child-list{
+  list-style: disc;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.child-list li{
+  margin: 6px 0;
+}
+
+.child-link{
+  color: var(--link-green);
+  text-decoration:none;
+  font-size: 13px;
+}
+
+.child-link:hover{
+  text-decoration:underline;
+}
+
+.child-empty{
+  font-size: 12px;
+  color:#555;
+  padding: 6px 0;
+}
+
+
   /* ====== Optional: make it behave nicely on smaller screens ====== */
   @media (max-width: 900px){
     .oligo-tabs{
@@ -334,6 +415,240 @@
       .layout{ grid-template-columns: 1fr; }
       .left{ border-right:0; border: 1px solid var(--line); }
     }
+    /* ===========================
+   PATCH: UI polish + conflicts
+   Paste at END of <style>
+=========================== */
+
+/* 1) Make “Browse/Search Articles” tabs actually styled (your HTML uses .tabs) */
+.tabs{
+  display:flex;
+  align-items:flex-end;
+  gap:6px;
+  border-bottom:1px solid var(--line);
+  margin: 10px 0 10px;
+}
+
+.tabs .tab{
+  border:0;
+  padding: 8px 12px;
+  background: var(--tab);
+  cursor:pointer;
+  font-size: 14px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.tabs .tab.active{
+  background: var(--tab-active);
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid #fff;
+  font-weight: 700;
+}
+
+/* 2) Fix subject list CSS conflict:
+   Your old `.subjects li { display:flex; padding:7px 4px; ... }` is overriding the
+   newer accordion look. Override it ONLY for subject-item list entries. */
+.subjects > li.subject-item{
+  display:block;
+  padding:0;
+  cursor: default;
+  border: 0;
+  background: transparent;
+}
+
+/* Remove the old hover/active look on the LI itself; keep styling on the button */
+.subjects > li.subject-item:hover{
+  background: transparent;
+  border-color: transparent;
+}
+
+/* 3) Button feel: nicer hover, active, keyboard focus */
+.subject-btn{
+  transition: border-color .15s ease, box-shadow .15s ease, transform .05s ease;
+}
+
+.subject-btn:hover{
+  border-color:#cfcfcf;
+}
+
+.subject-btn:active{
+  transform: translateY(1px);
+}
+
+.subject-btn:focus-visible{
+  outline: 3px solid rgba(79,178,71,.35);
+  outline-offset: 2px;
+}
+
+/* 4) Left panel readability + scroll when long */
+.left{
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.left .controls{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.left .controls a{
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.left .controls a:hover{
+  background:#ffffff;
+}
+
+/* 5) Right panel polish */
+.right{
+  border-radius: 8px;
+  overflow:hidden; /* keeps header/pager edges clean */
+}
+
+.right-header{
+  letter-spacing: .2px;
+}
+
+/* Results row hover + better click target */
+.results li{
+  transition: background .12s ease;
+}
+
+.results li:hover{
+  filter: brightness(0.98);
+}
+
+.result-link{
+  display:inline-block;
+  padding: 2px 0;
+}
+
+.result-link:focus-visible{
+  outline: 3px solid rgba(79,178,71,.35);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 6) Pager buttons feel more “button-like” */
+.pager a{
+  border-radius: 6px;
+}
+
+.pager a:hover{
+  filter: brightness(0.95);
+}
+
+/* 7) Search panel styling (your #searchPanel currently has almost no CSS) */
+#searchPanel .panel{
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background:#fff;
+}
+
+#searchPanel .header{
+  font-weight: 700;
+  margin: 12px 0 8px;
+}
+
+#searchPanel .row{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+
+#searchPanel label{
+  min-width: 180px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+#searchPanel input[type="text"],
+#searchPanel select{
+  width: min(520px, 100%);
+  padding: 8px 10px;
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+#searchSubmitBtn{
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #1e1e1e;
+  background:#fff;
+  cursor:pointer;
+  font-weight: 700;
+}
+
+#searchSubmitBtn:hover{
+  filter: brightness(0.96);
+}
+
+/* Make search results reuse your results look */
+#searchResults{
+  list-style:none;
+  margin:0;
+  padding:0;
+}
+
+#searchResults li{
+  display:grid;
+  grid-template-columns: 18px 1fr;
+  gap: 8px;
+  align-items:center;
+  padding: 7px 10px;
+  border-bottom: 2px solid #fff;
+  background: var(--row);
+  font-size: 13px;
+}
+
+#searchResults li:nth-child(even){
+  background: var(--row2);
+}
+
+#searchResults a{
+  color: var(--link-green);
+  text-decoration:none;
+}
+
+#searchResults a:hover{
+  text-decoration:underline;
+}
+
+/* 8) Mobile improvements:
+   - Stack results nicer (hide empty date col)
+   - Reduce padding
+*/
+@media (max-width: 600px){
+  .page{
+    padding: 10px 10px 18px;
+  }
+
+  .layout{
+    gap: 10px;
+  }
+
+  .results li{
+    grid-template-columns: 18px 1fr; /* drop the 110px date column */
+  }
+
+  .date{
+    display:none;
+  }
+
+  .oligo-tabs{
+    gap: 18px;
+  }
+}
+
   </style>
 </head>
 
@@ -714,37 +1029,127 @@ document.addEventListener("DOMContentLoaded", function () {
 
     return out;
   }
-function renderBrowse(subjects) {
-  const rightPanel = document.querySelector("#browsePanel .right");
-  if (!rightPanel) return;
+function renderBrowseUI(subjects) {
+  const subjectsList = document.getElementById("subjectsList");
+  const resultsHeader = document.getElementById("resultsHeader");
+  const resultsList = document.getElementById("resultsList");
+  const pager = document.getElementById("pager");
 
-  rightPanel.innerHTML = "";
+  if (!subjectsList || !resultsHeader || !resultsList) return;
 
-  subjects.forEach(subject => {
-    const h3 = document.createElement("h3");
-    h3.textContent = subject.title;
-    rightPanel.appendChild(h3);
+  if (pager) pager.style.display = "none";
 
-    const ul = document.createElement("ul");
+  subjectsList.innerHTML = "";
+  resultsHeader.textContent = "Select a subject";
+  resultsList.innerHTML = "";
 
+  function buildSubjectLinks(subject) {
+    let links = [];
     subject.children.forEach(child => {
-      collectLeafLinks(child).forEach(item => {
-        const li = document.createElement("li");
-        li.innerHTML = `
-          <a href="${item.href}" target="${item.target}">
-            ${item.title}
-          </a>
-        `;
-        ul.appendChild(li);
+      links = links.concat(collectLeafLinks(child));
+    });
+    return links;
+  }
+
+  function renderRight(subject) {
+    const links = buildSubjectLinks(subject);
+    resultsHeader.textContent = subject.title;
+    resultsList.innerHTML = "";
+
+    if (!links.length) {
+      const li = document.createElement("li");
+      li.innerHTML = `<span class="dot"></span><span>No articles found</span><span class="date"></span>`;
+      resultsList.appendChild(li);
+      return;
+    }
+
+    links.forEach(item => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <span class="dot"></span>
+        <a class="result-link" href="${item.href}" target="${item.target}">
+          ${item.title}
+        </a>
+        <span class="date"></span>
+      `;
+      resultsList.appendChild(li);
+    });
+  }
+
+function setActiveSubject(index) {
+  const items = subjectsList.querySelectorAll(".subject-item");
+
+  items.forEach((li, i) => {
+    li.classList.toggle("active", i === index);
+  });
+
+  renderRight(subjects[index]);
+}
+
+
+  // Build left accordion
+subjects.forEach((subject, idx) => {
+  const li = document.createElement("li");
+  li.className = "subject-item";
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "subject-btn";
+  btn.setAttribute("aria-expanded", "false");
+  btn.innerHTML = `
+    <span class="subject-title">${subject.title}</span>
+  `;
+
+  btn.addEventListener("click", () => {
+    setActiveSubject(idx);
+  });
+
+  li.appendChild(btn);
+  subjectsList.appendChild(li);
+});
+
+
+  // Hook up Collapse/Expand All
+  const collapseAll = document.getElementById("collapseAll");
+  const expandAll = document.getElementById("expandAll");
+
+  if (collapseAll) {
+    collapseAll.addEventListener("click", (e) => {
+      e.preventDefault();
+      const items = subjectsList.querySelectorAll(".subject-item");
+      items.forEach(li => {
+        li.classList.remove("active");
+        const btn = li.querySelector(".subject-btn");
+        const childWrap = li.querySelector(".subject-children");
+        if (btn) btn.setAttribute("aria-expanded", "false");
+        if (childWrap) childWrap.hidden = true;
+      });
+      resultsHeader.textContent = "Select a subject";
+      resultsList.innerHTML = "";
+    });
+  }
+
+  if (expandAll) {
+    expandAll.addEventListener("click", (e) => {
+      e.preventDefault();
+      const items = subjectsList.querySelectorAll(".subject-item");
+      items.forEach((li, i) => {
+        li.classList.add("active");
+        const btn = li.querySelector(".subject-btn");
+        const childWrap = li.querySelector(".subject-children");
+        if (btn) btn.setAttribute("aria-expanded", "true");
+        if (childWrap) childWrap.hidden = false;
       });
     });
+  }
 
-    rightPanel.appendChild(ul);
-  });
+  // Auto-open the first subject (optional)
+  if (subjects.length) setActiveSubject(0);
 }
-  const subjects = parseSubjectsFromSource(sourceEl);
-// 🔁 RESTORE BROWSE RENDERING
-renderBrowse(subjects);
+
+const subjects = parseSubjectsFromSource(sourceEl);
+renderBrowseUI(subjects);
+
 
   /* ===============================
      SEARCH (USES SAME DATA AS BROWSE)
