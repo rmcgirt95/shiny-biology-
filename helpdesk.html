@@ -244,7 +244,7 @@
     .itemMeta a:hover{ text-decoration: underline; }
 
     .subline{
-      display:flex;
+      display:none;
       flex-wrap:wrap;
       gap:8px;
       margin-top: 6px;
@@ -336,11 +336,7 @@
           <h2>Quick Links</h2>
           <small><span id="count"></span></small>
         </div>
-        <div class="bd">
-          <div class="notice">
-            This page is hard-coded for your hosted domain (no local storage, no database).
-            If a folder name contains spaces/parentheses, we use URL-safe encoding automatically.
-          </div>
+      
 
           <div class="items" id="links"></div>
         </div>
@@ -442,60 +438,7 @@
       // ✅ Optional: if you DO know specific files, list them here.
       // If you don’t, you can leave arrays empty and just use the "Open Folder" link.
       const SECTION_ITEMS = [
-        {
-          section: "Document Template (public)",
-          folder: "0, Document Template (public)",
-          items: [
-            // Replace these example filenames with the real ones when ready:
-            { title: "Access Request Form (DOCX)", url: "0, Document Template (public)/Access_Request.docx", tags: ["template","access"], notes: "Example file link" },
-            { title: "Incident Report Template (DOCX)", url: "0, Document Template (public)/Incident_Report.docx", tags: ["template","incident"], notes: "Example file link" }
-          ]
-        },
-        {
-          section: "Finance (public)",
-          folder: "1, Finance (public)",
-          items: []
-        },
-        {
-          section: "HR (public)",
-          folder: "2, HR (public)",
-          items: []
-        },
-        {
-          section: "Quality (public)",
-          folder: "3, Quality (public)",
-          items: []
-        },
-        {
-          section: "IT (public)",
-          folder: "4, IT (public)",
-          items: []
-        },
-        {
-          section: "EHS (public)",
-          folder: "5, EHS (public)",
-          items: []
-        },
-        {
-          section: "Facilities (public)",
-          folder: "6, Facilities (public)",
-          items: []
-        },
-        {
-          section: "Production",
-          folder: "7, Production",
-          items: []
-        },
-        {
-          section: "Group photo",
-          folder: "8, Group photo",
-          items: []
-        },
-        {
-          section: "All-hands",
-          folder: "9, All-hands",
-          items: []
-        }
+       
       ];
 function isFileLink(href){
   if (!href) return false;
@@ -590,28 +533,7 @@ const abs = new URL(href, window.location.origin + url).pathname;
   return unique;
 }
 
-      function buildCategoryOptions(){
-        const set = new Set();
-        QUICK_LINKS.forEach(x => set.add(x.category));
-        set.add("Folders");
-        // Also add section names so you can filter by folder/section
-        SECTION_ITEMS.forEach(s => set.add(s.section));
-
-        const cats = Array.from(set).filter(Boolean).sort((a,b) => a.localeCompare(b));
-
-        els.categoryFilter.innerHTML = "";
-        const all = document.createElement("option");
-        all.value = "all";
-        all.textContent = "All categories";
-        els.categoryFilter.appendChild(all);
-
-        cats.forEach(c => {
-          const o = document.createElement("option");
-          o.value = c;
-          o.textContent = c;
-          els.categoryFilter.appendChild(o);
-        });
-      }
+      
 
       function render(){
         const q = cleanText(els.q.value).toLowerCase();
@@ -624,7 +546,7 @@ const abs = new URL(href, window.location.origin + url).pathname;
         els.links.innerHTML = "";
         const quickTitle = document.createElement("div");
         quickTitle.className = "mono";
-        quickTitle.textContent = "Quick Links";
+        quickTitle.textContent = "";
         els.links.appendChild(quickTitle);
 
         QUICK_LINKS.forEach(link => {
@@ -640,15 +562,19 @@ const abs = new URL(href, window.location.origin + url).pathname;
           if (!matches) return;
           totalMatches++;
 
-          els.links.appendChild(renderRow(item.title, item.url, item.category, item.tags, item.notes));
+          els.links.appendChild(renderRow(item.title, item.url, item.category, item.tags));
         });
 
         // Folder Links
         const folderTitle = document.createElement("div");
-        folderTitle.className = "mono";
-        folderTitle.style.marginTop = "10px";
-        folderTitle.textContent = "Folder Library";
-        els.links.appendChild(folderTitle);
+folderTitle.className = "mono";
+folderTitle.style.marginTop = "10px";
+folderTitle.style.fontWeight = "900";   // bold
+folderTitle.style.fontSize = "16px";    // bigger text
+folderTitle.textContent = "Folders";
+
+els.links.appendChild(folderTitle);
+
 
         FOLDERS.forEach(f => {
 const folderUrl = encodePath("/" + f.folder + "/");
@@ -952,7 +878,6 @@ function fileIcon(fileName){
 
 
       // Init
-      buildCategoryOptions();
       els.q.addEventListener("input", render);
       els.categoryFilter.addEventListener("change", render);
       render();
