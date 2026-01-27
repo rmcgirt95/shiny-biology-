@@ -1,0 +1,962 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Synoligo Help Desk</title>
+
+  <style>
+    :root{
+      --bg:#ffffff;
+      --ink:#0f172a;
+      --muted:#475569;
+      --line:#e2e8f0;
+      --soft:#f8fafc;
+      --brand:#0ea5e9;
+      --brand2:#22c55e;
+      --danger:#ef4444;
+      --warn:#f59e0b;
+      --radius:16px;
+      --shadow: 0 10px 30px rgba(2,6,23,.08);
+      --shadow2: 0 6px 16px rgba(2,6,23,.08);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: var(--sans);
+      color:var(--ink);
+      background:linear-gradient(180deg, #f0f9ff 0%, #ffffff 40%);
+    }
+
+    .wrap{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 18px 64px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,.85);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow2);
+      position: sticky;
+      top: 12px;
+      backdrop-filter: blur(10px);
+      z-index: 10;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width: 240px;
+    }
+
+    /* Logo image */
+    .logo{
+      width:auto;
+      height:50px;
+      object-fit: contain;
+      border-radius: 10px;
+    }
+
+    .brand h1{
+      margin:0;
+      font-size: 16px;
+      line-height: 1.1;
+      font-weight: 800;
+    }
+    .brand p{
+      margin:2px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex:1;
+      justify-content:flex-end;
+      flex-wrap: wrap;
+    }
+
+    .input, select{
+      width: 100%;
+      padding: 10px 12px;
+      border:1px solid var(--line);
+      border-radius: 12px;
+      background:#fff;
+      font-size: 14px;
+      outline:none;
+    }
+    .input:focus, select:focus{
+      border-color: rgba(14,165,233,.55);
+      box-shadow: 0 0 0 4px rgba(14,165,233,.12);
+    }
+
+    .search{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width: 320px;
+      flex: 1;
+    }
+
+    @media (max-width: 980px){
+      .brand{ min-width: unset; }
+      .search{ min-width: unset; }
+    }
+
+    .grid{
+      margin-top: 18px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      align-items:start;
+    }
+
+    .card{
+      background:#fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .card .hd{
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #f8fafc);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+
+    .card .hd h2{
+      margin:0;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: .2px;
+    }
+
+    .card .hd small{
+      color: var(--muted);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .card .bd{
+      padding: 14px 16px 16px;
+    }
+
+    .notice{
+      border: 1px solid rgba(14,165,233,.25);
+      background: rgba(14,165,233,.06);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #0b4a6e;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      background: rgba(34,197,94,.10);
+      color: #166534;
+      border: 1px solid rgba(34,197,94,.25);
+      white-space:nowrap;
+    }
+
+    .btnLink{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background:#fff;
+      text-decoration:none;
+      color: var(--ink);
+      font-weight: 900;
+      font-size: 13px;
+      transition: box-shadow .12s ease, border-color .12s ease;
+    }
+    .btnLink:hover{
+      border-color: rgba(14,165,233,.45);
+      box-shadow: 0 10px 26px rgba(2,6,23,.08);
+    }
+
+    .items{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top: 12px;
+    }
+
+    .item{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .itemMeta{
+      min-width:0;
+    }
+
+    .itemMeta a{
+      display:inline-block;
+      font-weight: 900;
+      color: #0b4a6e;
+      text-decoration:none;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+    .itemMeta a:hover{ text-decoration: underline; }
+
+    .subline{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      align-items:center;
+    }
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .mono{
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .divider{
+      height:1px;
+      background: var(--line);
+      margin: 14px 0;
+    }
+
+    .twoCol{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .twoCol{ grid-template-columns: 1fr; }
+    }
+    .statusMsg{
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+.itemMeta a{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-weight:900;
+  font-size:14px;
+}
+
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <img src="/logo.png" alt="Synoligo Biotechnologies logo" class="logo" />
+        <div>
+          <h1>Synoligo Biotechnologies — Help Desk</h1>
+          <p>Internal corporate quick links & file library</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="search">
+          <input id="q" class="input" type="search" placeholder="Search files & links (name, tags, notes)..." />
+        </div>
+        <select id="categoryFilter" aria-label="Filter category">
+          <option value="all">All categories</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid">
+
+      <section class="card">
+        <div class="hd">
+          <h2>Quick Links</h2>
+          <small><span id="count"></span></small>
+        </div>
+        <div class="bd">
+          <div class="notice">
+            This page is hard-coded for your hosted domain (no local storage, no database).
+            If a folder name contains spaces/parentheses, we use URL-safe encoding automatically.
+          </div>
+
+          <div class="items" id="links"></div>
+        </div>
+      </section>
+
+      <section class="twoCol" id="sections"></section>
+
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      "use strict";
+
+      const els = {
+        q: document.getElementById("q"),
+        categoryFilter: document.getElementById("categoryFilter"),
+        links: document.getElementById("links"),
+        count: document.getElementById("count"),
+        sections: document.getElementById("sections"),
+      };
+
+      // Encodes each path segment but keeps slashes in place
+     function encodePath(path){
+  const raw = (path || "").toString();
+  if (!raw) return "";
+
+  // support absolute URLs (http/https/mailto)
+  if (/^(https?:\/\/|mailto:)/i.test(raw)) return raw;
+
+  const isRoot = raw.startsWith("/");
+
+  // Split by slash and encode each segment safely (prevents double-encoding)
+  const parts = raw
+    .split("/")
+    .filter(Boolean)
+    .map(seg => encodeURIComponent(decodeURIComponent(seg)));
+
+  return (isRoot ? "/" : "") + parts.join("/");
+}
+
+
+      function cleanText(s){
+        return (s || "").toString().trim();
+      }
+
+      function matchItem(item, query){
+        if (!query) return true;
+        const q = query.toLowerCase();
+        const blob = [
+          item.title, item.category, item.url,
+          (item.tags || []).join(" "),
+          item.notes || ""
+        ].join(" ").toLowerCase();
+        return blob.includes(q);
+      }
+
+      // ✅ Hard-coded "Quick Links" (add your real ones here)
+      const QUICK_LINKS = [
+        {
+          title: "Synoligo Website",
+          url: "https://synoligo.com/",
+          category: "Links",
+          tags: ["public"],
+          notes: "Main website"
+        },
+        {
+          title: "Caculator",
+          url: "http://18.188.124.9/calculator/",
+          category: "Links",
+          tags: ["support"],
+          notes: "Caculator"
+        },
+         {
+          title: "Local Caculator",
+          url: "http://10.101.1.142:8081/oligo-calculator/users",
+          category: "Links",
+          tags: ["it", "support"],
+          notes: "Local Calculator"
+        }
+      ];
+
+      // ✅ Your folder library (from your screenshot)
+      // Assumption: these folders exist at the same level as this HTML page on your host.
+   const FOLDERS = [
+  { title: "Document Template", folder: "Document Template", category: "Folders", tags: ["templates", "forms"], notes: "Templates and shared docs" },
+  { title: "Finance",           folder: "Finance",           category: "Folders", tags: ["finance"],            notes: "Finance resources" },
+  { title: "HR",                folder: "HR",                category: "Folders", tags: ["hr"],                 notes: "HR resources" },
+  { title: "Quality",           folder: "Quality",           category: "Folders", tags: ["qa", "quality"],      notes: "Quality docs" },
+  { title: "IT",                folder: "IT",                category: "Folders", tags: ["it"],                 notes: "IT docs and tools" },
+  { title: "EHS",               folder: "EHS",               category: "Folders", tags: ["ehs", "safety"],      notes: "Environment, Health & Safety" },
+  { title: "Facilities",        folder: "Facilities",        category: "Folders", tags: ["facilities"],         notes: "Facilities docs" },
+  { title: "Production",        folder: "Production",        category: "Folders", tags: ["production"],         notes: "Production resources" },
+  { title: "Group photo",       folder: "Group photo",       category: "Folders", tags: ["photos"],             notes: "Company photos" },
+  { title: "All-hands",         folder: "All-hands",         category: "Folders", tags: ["meetings"],           notes: "All-hands materials" }
+];
+
+
+      // ✅ Optional: if you DO know specific files, list them here.
+      // If you don’t, you can leave arrays empty and just use the "Open Folder" link.
+      const SECTION_ITEMS = [
+        {
+          section: "Document Template (public)",
+          folder: "0, Document Template (public)",
+          items: [
+            // Replace these example filenames with the real ones when ready:
+            { title: "Access Request Form (DOCX)", url: "0, Document Template (public)/Access_Request.docx", tags: ["template","access"], notes: "Example file link" },
+            { title: "Incident Report Template (DOCX)", url: "0, Document Template (public)/Incident_Report.docx", tags: ["template","incident"], notes: "Example file link" }
+          ]
+        },
+        {
+          section: "Finance (public)",
+          folder: "1, Finance (public)",
+          items: []
+        },
+        {
+          section: "HR (public)",
+          folder: "2, HR (public)",
+          items: []
+        },
+        {
+          section: "Quality (public)",
+          folder: "3, Quality (public)",
+          items: []
+        },
+        {
+          section: "IT (public)",
+          folder: "4, IT (public)",
+          items: []
+        },
+        {
+          section: "EHS (public)",
+          folder: "5, EHS (public)",
+          items: []
+        },
+        {
+          section: "Facilities (public)",
+          folder: "6, Facilities (public)",
+          items: []
+        },
+        {
+          section: "Production",
+          folder: "7, Production",
+          items: []
+        },
+        {
+          section: "Group photo",
+          folder: "8, Group photo",
+          items: []
+        },
+        {
+          section: "All-hands",
+          folder: "9, All-hands",
+          items: []
+        }
+      ];
+function isFileLink(href){
+  if (!href) return false;
+  // ignore parent/current nav
+  if (href === "../" || href === "./") return false;
+  // ignore query-only
+  if (href.startsWith("?")) return false;
+  // ignore anchors
+  if (href.startsWith("#")) return false;
+  return true;
+}
+
+function getFileNameFromHref(href){
+  try{
+    const u = new URL(href, window.location.origin);
+    const parts = u.pathname.split("/").filter(Boolean);
+    return parts[parts.length - 1] || href;
+  }catch{
+    const parts = href.split("/").filter(Boolean);
+    return parts[parts.length - 1] || href;
+  }
+}
+
+function prettyTitleFromFileName(fileName){
+  if (!fileName) return "";
+
+  // Decode safely
+  let decoded;
+  try { decoded = decodeURIComponent(fileName); }
+  catch { decoded = fileName; }
+
+  // Normalize slashes and keep only the filename
+  decoded = decoded.replace(/\\/g, "/");
+  const parts = decoded.split("/").filter(Boolean);
+  const justName = parts[parts.length - 1] || decoded;
+
+  // Remove extension
+  const noExt = justName.replace(/\.[^.]+$/, "");
+
+  // Prettify
+  return noExt
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+
+
+async function fetchFolderFiles(folderPath){
+  // folderPath should be like "/Document%20Template/" (root-relative)
+  const url = folderPath.endsWith("/") ? folderPath : (folderPath + "/");
+
+  const res = await fetch(url, { method: "GET" });
+  if (!res.ok) {
+    throw new Error("Folder not accessible (HTTP " + res.status + ")");
+  }
+
+  const html = await res.text();
+  const doc = new DOMParser().parseFromString(html, "text/html");
+
+  // Most directory listings contain <a href="filename.ext">filename.ext</a>
+  const anchors = Array.from(doc.querySelectorAll("a[href]"));
+
+  const files = anchors
+    .map(a => a.getAttribute("href"))
+    .filter(isFileLink)
+    // Remove subfolders if you only want files (heuristic: has a dot extension)
+    .filter(href => /\.[a-z0-9]{1,6}(\?|#|$)/i.test(href))
+.map(href => {
+const abs = new URL(href, window.location.origin + url).pathname;
+  const name = getFileNameFromHref(href);
+  return {
+    title: prettyTitleFromFileName(name),
+    url: abs,
+    fileName: name,
+    tags: []
+  };
+});
+
+
+  // De-dupe by URL
+  const seen = new Set();
+  const unique = [];
+  for (const f of files){
+    if (seen.has(f.url)) continue;
+    seen.add(f.url);
+    unique.push(f);
+  }
+
+  // Sort A→Z by filename
+  unique.sort((a,b) => a.fileName.localeCompare(b.fileName));
+  return unique;
+}
+
+      function buildCategoryOptions(){
+        const set = new Set();
+        QUICK_LINKS.forEach(x => set.add(x.category));
+        set.add("Folders");
+        // Also add section names so you can filter by folder/section
+        SECTION_ITEMS.forEach(s => set.add(s.section));
+
+        const cats = Array.from(set).filter(Boolean).sort((a,b) => a.localeCompare(b));
+
+        els.categoryFilter.innerHTML = "";
+        const all = document.createElement("option");
+        all.value = "all";
+        all.textContent = "All categories";
+        els.categoryFilter.appendChild(all);
+
+        cats.forEach(c => {
+          const o = document.createElement("option");
+          o.value = c;
+          o.textContent = c;
+          els.categoryFilter.appendChild(o);
+        });
+      }
+
+      function render(){
+        const q = cleanText(els.q.value).toLowerCase();
+        const cat = els.categoryFilter.value || "all";
+
+        // Count all items that match: quick links + folder links + section file links
+        let totalMatches = 0;
+
+        // Quick Links
+        els.links.innerHTML = "";
+        const quickTitle = document.createElement("div");
+        quickTitle.className = "mono";
+        quickTitle.textContent = "Quick Links";
+        els.links.appendChild(quickTitle);
+
+        QUICK_LINKS.forEach(link => {
+          const item = {
+            title: link.title,
+            category: link.category,
+            url: link.url,
+            tags: link.tags || [],
+            notes: link.notes || ""
+          };
+
+          const matches = matchItem(item, q) && (cat === "all" || cat === item.category);
+          if (!matches) return;
+          totalMatches++;
+
+          els.links.appendChild(renderRow(item.title, item.url, item.category, item.tags, item.notes));
+        });
+
+        // Folder Links
+        const folderTitle = document.createElement("div");
+        folderTitle.className = "mono";
+        folderTitle.style.marginTop = "10px";
+        folderTitle.textContent = "Folder Library";
+        els.links.appendChild(folderTitle);
+
+        FOLDERS.forEach(f => {
+const folderUrl = encodePath("/" + f.folder + "/");
+  const item = {
+    title: f.title,
+    category: "Folders",
+    url: folderUrl,
+    tags: f.tags || [],
+    notes: f.notes || ""
+  };
+
+  const matches = matchItem(item, q) && (cat === "all" || cat === "Folders");
+  if (!matches) return;
+
+  // Create a row
+  const row = document.createElement("div");
+  row.className = "item";
+
+  const meta = document.createElement("div");
+  meta.className = "itemMeta";
+
+  const titleEl = document.createElement("a");
+  titleEl.href = "javascript:void(0)";
+  titleEl.textContent = "📁 " + item.title;
+
+  const sub = document.createElement("div");
+  sub.className = "subline";
+
+  const c = document.createElement("span");
+  c.className = "tag";
+  c.textContent = item.category;
+  sub.appendChild(c);
+
+  (item.tags || []).slice(0, 6).forEach(t => {
+    const tg = document.createElement("span");
+    tg.className = "tag";
+    tg.textContent = "#" + t;
+    sub.appendChild(tg);
+  });
+
+  if (item.notes){
+    const n = document.createElement("span");
+    n.style.marginLeft = "2px";
+    n.textContent = "• " + item.notes;
+    sub.appendChild(n);
+  }
+
+  meta.appendChild(titleEl);
+  meta.appendChild(sub);
+
+  const right = document.createElement("div");
+  right.style.display = "flex";
+  right.style.alignItems = "flex-start";
+  right.style.justifyContent = "flex-end";
+  right.style.gap = "8px";
+
+  const openFolder = document.createElement("a");
+  openFolder.className = "btnLink";
+  openFolder.href = folderUrl;
+  openFolder.target = "_blank";
+  openFolder.rel = "noopener noreferrer";
+  openFolder.textContent = "Open Folder";
+
+  const toggle = document.createElement("button");
+  toggle.className = "btnLink";
+  toggle.type = "button";
+  toggle.textContent = "View Files";
+
+  right.appendChild(toggle);
+  right.appendChild(openFolder);
+
+  row.appendChild(meta);
+  row.appendChild(right);
+
+  // Expand container
+  const fileContainer = document.createElement("div");
+  fileContainer.className = "items";
+  fileContainer.style.display = "none";
+  fileContainer.style.marginTop = "10px";
+
+  // Wrap row + container
+  const wrapper = document.createElement("div");
+  wrapper.appendChild(row);
+  wrapper.appendChild(fileContainer);
+
+  // Toggle behavior
+  let loaded = false;
+  let open = false;
+
+  async function doToggle(){
+    open = !open;
+
+    if (!open){
+      fileContainer.style.display = "none";
+      toggle.textContent = "View Files";
+      return;
+    }
+
+    fileContainer.style.display = "block";
+    toggle.textContent = "Hide Files";
+
+    if (loaded) return;
+
+    fileContainer.innerHTML = `<div class="statusMsg">Loading files…</div>`;
+
+    try{
+      const files = await fetchFolderFiles(folderUrl);
+
+      if (!files.length){
+        fileContainer.innerHTML = `<div class="statusMsg">No files found (or directory listing is disabled).</div>`;
+      } else {
+        fileContainer.innerHTML = "";
+        files.forEach(file => {
+          fileContainer.appendChild(
+            renderRow(
+              file.title,
+              file.url,
+              f.title,
+              file.tags || [],
+decodeURIComponent(file.fileName).replace(/\\/g,"/").split("/").pop()
+            )
+          );
+        });
+      }
+
+      loaded = true;
+    }catch(err){
+      fileContainer.innerHTML = `<div class="statusMsg">Could not load folder list. Directory listing may be disabled.</div>`;
+      console.error(err);
+    }
+  }
+
+  toggle.addEventListener("click", doToggle);
+  titleEl.addEventListener("click", doToggle);
+
+  els.links.appendChild(wrapper);
+  totalMatches++;
+});
+
+
+        // Sections (cards)
+        els.sections.innerHTML = "";
+
+        SECTION_ITEMS.forEach(sec => {
+          const secCat = sec.section;
+          const folderUrl = encodePath("./" + sec.folder + "/");
+
+          // Determine if section should appear at all (based on query/category)
+          const itemsToShow = (sec.items || []).filter(it => {
+            const normalized = {
+              title: it.title,
+              category: secCat,
+              url: encodePath("./" + it.url),
+              tags: it.tags || [],
+              notes: it.notes || ""
+            };
+            const match = matchItem(normalized, q) && (cat === "all" || cat === secCat);
+            return match;
+          });
+
+          const sectionMatchesItself = matchItem(
+            { title: sec.section, category: secCat, url: folderUrl, tags: [], notes: "" },
+            q
+          ) && (cat === "all" || cat === secCat);
+
+          // Show section if it matches by name OR any file inside matches
+          if (!sectionMatchesItself && itemsToShow.length === 0) return;
+
+          const card = document.createElement("section");
+          card.className = "card";
+
+          const hd = document.createElement("div");
+          hd.className = "hd";
+
+          const h2 = document.createElement("h2");
+          h2.textContent = sec.section;
+
+          const right = document.createElement("div");
+          right.className = "row";
+          right.style.justifyContent = "flex-end";
+          right.style.gap = "8px";
+
+          const pill = document.createElement("span");
+          pill.className = "pill";
+          pill.textContent = sec.items.length ? (sec.items.length + " item" + (sec.items.length === 1 ? "" : "s")) : "Folder";
+
+          const openFolder = document.createElement("a");
+          openFolder.className = "btnLink";
+          openFolder.href = folderUrl;
+          openFolder.target = "_blank";
+          openFolder.rel = "noopener noreferrer";
+          openFolder.textContent = "Open Folder";
+
+          right.appendChild(pill);
+          right.appendChild(openFolder);
+
+          hd.appendChild(h2);
+          hd.appendChild(right);
+
+          const bd = document.createElement("div");
+          bd.className = "bd";
+
+          if (!sec.items.length){
+            const note = document.createElement("div");
+            note.className = "notice";
+            note.textContent = "This section currently links to the folder. Add specific file links here when you’re ready.";
+            bd.appendChild(note);
+          } else {
+            const list = document.createElement("div");
+            list.className = "items";
+
+            itemsToShow.forEach(it => {
+              const url = encodePath("./" + it.url);
+              const normalized = { title: it.title, category: secCat, url, tags: it.tags || [], notes: it.notes || "" };
+
+              totalMatches++;
+              list.appendChild(renderRow(normalized.title, normalized.url, secCat, normalized.tags, normalized.notes));
+            });
+
+            bd.appendChild(list);
+          }
+
+          card.appendChild(hd);
+          card.appendChild(bd);
+
+          els.sections.appendChild(card);
+        });
+
+        els.count.textContent = totalMatches + " match" + (totalMatches === 1 ? "" : "es");
+      }
+function fileIcon(fileName){
+  const ext = (fileName.split(".").pop() || "").toLowerCase();
+  if (ext === "pdf") return "📄";
+  if (ext === "doc" || ext === "docx") return "📝";
+  if (ext === "ppt" || ext === "pptx") return "📊";
+  if (ext === "xls" || ext === "xlsx" || ext === "csv") return "📈";
+  if (["png","jpg","jpeg","gif","webp"].includes(ext)) return "🖼️";
+  return "📁";
+}
+
+     function renderRow(title, url, category, tags, notes){
+  const row = document.createElement("div");
+  row.className = "item";
+
+  const meta = document.createElement("div");
+  meta.className = "itemMeta";
+
+  const name = decodeURIComponent(title || "(Untitled)");
+  const icon = fileIcon(name);
+
+  const a = document.createElement("a");
+  a.href = encodePath(url);
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  a.textContent = `${icon} ${name}`;
+
+  const sub = document.createElement("div");
+  sub.className = "subline";
+
+  if (category){
+    const c = document.createElement("span");
+    c.className = "tag";
+    c.textContent = category;
+    sub.appendChild(c);
+  }
+
+  (tags || []).forEach(t => {
+    const tg = document.createElement("span");
+    tg.className = "tag";
+    tg.textContent = "#" + t;
+    sub.appendChild(tg);
+  });
+
+  if (notes){
+    const n = document.createElement("span");
+    n.textContent = "• " + notes;
+    sub.appendChild(n);
+  }
+
+  meta.appendChild(a);
+  meta.appendChild(sub);
+
+  const right = document.createElement("div");
+  right.style.display = "flex";
+  right.style.alignItems = "center";
+
+  const open = document.createElement("a");
+  open.className = "btnLink";
+  open.href = encodePath(url);
+  open.target = "_blank";
+  open.rel = "noopener noreferrer";
+  open.textContent = "Open";
+
+  right.appendChild(open);
+
+  row.appendChild(meta);
+  row.appendChild(right);
+
+  return row;
+}
+
+
+      // Init
+      buildCategoryOptions();
+      els.q.addEventListener("input", render);
+      els.categoryFilter.addEventListener("change", render);
+      render();
+    })();
+  </script>
+</body>
+</html>
