@@ -374,8 +374,13 @@
         sections: document.getElementById("sections"),
       };
 
-      // Encodes each path segment but keeps slashes in place
-     function encodePath(path){
+function safeDecode(s){
+  try { return decodeURIComponent(s); }
+  catch { return s; } // handles raw "%" like "10%"
+}
+
+// Encodes each path segment but keeps slashes in place
+function encodePath(path){
   const raw = (path || "").toString();
   if (!raw) return "";
 
@@ -384,14 +389,15 @@
 
   const isRoot = raw.startsWith("/");
 
-  // Split by slash and encode each segment safely (prevents double-encoding)
   const parts = raw
     .split("/")
     .filter(Boolean)
-    .map(seg => encodeURIComponent(decodeURIComponent(seg)));
+    .map(seg => encodeURIComponent(safeDecode(seg)));
 
   return (isRoot ? "/" : "") + parts.join("/");
 }
+
+
 
 
       function cleanText(s){
@@ -732,6 +738,7 @@ openFolder.href = openFolderUrl;
 
    try{
   fileContainer.innerHTML = `<div class="statusMsg">Loading files…</div>`;
+  console.log("Manifest URL:", manifestUrl);
 
   const res = await fetch(manifestUrl, { method: "GET" });
   if (!res.ok){
@@ -756,17 +763,23 @@ url: encodePath("./" + f.folder + "/" + fileName),
     fileContainer.innerHTML = `<div class="statusMsg">No files found in manifest.</div>`;
   } else {
     fileContainer.innerHTML = "";
-    files.forEach(file => {
-      fileContainer.appendChild(
-        renderRow(
-          file.title,
-          file.url,
-          f.title,
-          file.tags || [],
-          file.notes || decodeURIComponent(file.fileName).replace(/\\/g,"/").split("/").pop()
-        )
-      );
-    });
+   files.forEach(file => {
+  fileContainer.appendChild(
+    renderRow(
+      file.title,
+      file.url,
+      f.title,
+      file.tags || [],
+      (() => {
+        const raw = (file.fileName || "").toString();
+        let decoded = raw;
+        try { decoded = decodeURIComponent(raw); } catch(e) { decoded = raw; }
+        return decoded.replace(/\\/g,"/").split("/").pop();
+      })()
+    )
+  );
+});
+
   }
 
   loaded = true;
@@ -904,7 +917,7 @@ function fileIcon(fileName){
   const meta = document.createElement("div");
   meta.className = "itemMeta";
 
-  const decodedTitle = decodeURIComponent(title || "(Untitled)");
+const decodedTitle = (title || "(Untitled)").toString();
   const safeUrl = encodePath(url);
 
   const fileNameGuess = (notes || decodedTitle || "").toString();
